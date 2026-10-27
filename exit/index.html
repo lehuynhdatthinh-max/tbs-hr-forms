@@ -111,6 +111,11 @@
     .toast{position:fixed;z-index:2000;left:50%;bottom:calc(18px + env(safe-area-inset-bottom));display:none;width:min(520px,calc(100% - 26px));padding:14px 16px;border-radius:12px;color:#fff;background:#9a5300;box-shadow:0 18px 45px #0004;transform:translateX(-50%);font-weight:800;line-height:1.45}.toast.on{display:block}.toast.error{background:var(--danger)}
     .loading{position:fixed;inset:0;z-index:3000;display:none;place-items:center;background:#ffffffc7;backdrop-filter:blur(2px)}.loading.on{display:grid}.spinner{width:50px;height:50px;border:5px solid #e5e7eb;border-top-color:var(--primary);border-radius:50%;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
     .hidden{display:none!important}
+    .sign-wrap{margin-bottom:16px;scroll-margin-top:150px}
+    .sign-pad{display:block;width:100%;max-width:520px;height:170px;border:1.5px solid var(--field);border-radius:10px;background:#fff;touch-action:none;cursor:crosshair}
+    .sign-wrap.invalid .sign-pad{border-color:var(--danger);background:#FFF7F7}
+    .sign-tools{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:6px;color:var(--muted);font-size:14px}
+    .link-btn{border:0;background:none;color:var(--primary-d);font-weight:700;font-size:14px;padding:4px;text-decoration:underline}
 
     /* ===== Giao diện theo nhận diện TBS Logistics — đồng bộ với SafetyHub ===== */
     body{background:#fff;color:var(--text);font-size:16px;line-height:1.5}
@@ -262,6 +267,11 @@
       <div id="dynamicSurveySections"></div>
 
       <section class="card">
+        <div class="sign-wrap" id="signWrap">
+          <label class="field-label required" for="signPad">Chữ ký người lao động</label>
+          <canvas class="sign-pad" id="signPad" aria-label="Ô ký tên"></canvas>
+          <div class="sign-tools"><span>Ký bằng ngón tay hoặc chuột trong khung trên.</span><button class="link-btn" type="button" id="signClear">Ký lại</button></div>
+        </div>
         <label class="consent"><input id="consent" type="checkbox"><span>Tôi xác nhận các thông tin trên là phản hồi của cá nhân tôi và đồng ý gửi phiếu này cho doanh nghiệp.</span></label>
         <div class="actions"><button class="btn btn-success submit-btn" id="submitButton" type="submit">Gửi phiếu phỏng vấn</button></div>
       </section>
@@ -373,6 +383,7 @@
 
     function bindStaticEvents(){
       document.getElementById("surveyForm").addEventListener("submit",submitSurvey);
+      setupSignPad();
       document.getElementById("consent").addEventListener("change",updateProgress);
       document.getElementById("leaveDate").addEventListener("change",updateProgress);
 
@@ -567,6 +578,7 @@
         idbp:value("idbp"),
         leaveDate:value("leaveDate"),
         answers:collectAnswers(),
+        signature:signatureDataUrl(),
         userAgent:navigator.userAgent
       };
     }
@@ -578,6 +590,7 @@
       if(!payload.leaveDate)return focusError("leaveDate","Vui lòng chọn Ngày nghỉ việc.");
       if(payload.workDate&&payload.workDate>payload.leaveDate)return focusError("leaveDate","Ngày nghỉ việc không được trước Ngày vào làm.");
       if(!validateDynamicAnswers(payload.answers))return false;
+      if(!payload.signature){document.getElementById("signWrap").classList.add("invalid");return focusError("signPad","Vui lòng ký tên trước khi gửi.")}
       if(!document.getElementById("consent").checked)return focusError("consent","Vui lòng xác nhận trước khi gửi.");
       return true;
     }
@@ -649,7 +662,8 @@
       const requiredQuestions=[];
       for(const section of state.schema?.sections||[])for(const question of section.questions||[])if(question.required)requiredQuestions.push(question);
       let completed=0;
-      const baseTotal=4;
+      const baseTotal=5;
+      if(signPad.dirty)completed++;
       if(value("employeeId"))completed++;
       if(state.employee?.complete)completed++;
       if(value("leaveDate"))completed++;
@@ -923,6 +937,43 @@
     }
 
     function mobileField(label,text){return`<div class="mobile-field"><div class="mobile-label">${escapeHtml(label)}</div><div class="mobile-value">${escapeHtml(text)}</div></div>`}
+    /* Chữ ký (bắt buộc): vẽ trên canvas, gửi kèm phiếu dạng PNG nền trắng 520x170. */
+    const signPad={canvas:null,ctx:null,drawing:false,dirty:false,last:null};
+    function setupSignPad(){
+      const canvas=document.getElementById("signPad");signPad.canvas=canvas;
+      const resize=()=>{
+        const saved=signPad.dirty?canvas.toDataURL("image/png"):"";
+        const ratio=Math.max(window.devicePixelRatio||1,1);
+        canvas.width=canvas.clientWidth*ratio;canvas.height=canvas.clientHeight*ratio;
+        signPad.ctx=canvas.getContext("2d");signPad.ctx.scale(ratio,ratio);
+        signPad.ctx.lineWidth=2.4;signPad.ctx.lineCap="round";signPad.ctx.lineJoin="round";signPad.ctx.strokeStyle="#1a2a6c";
+        if(saved){const img=new Image();img.onload=()=>signPad.ctx.drawImage(img,0,0,canvas.clientWidth,canvas.clientHeight);img.src=saved}
+      };
+      resize();
+      window.addEventListener("resize",()=>{clearTimeout(resize.t);resize.t=setTimeout(resize,150)});
+      const point=e=>{const r=canvas.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top}};
+      canvas.addEventListener("pointerdown",e=>{e.preventDefault();canvas.setPointerCapture(e.pointerId);signPad.drawing=true;signPad.last=point(e)});
+      canvas.addEventListener("pointermove",e=>{
+        if(!signPad.drawing)return;
+        const p=point(e);signPad.ctx.beginPath();signPad.ctx.moveTo(signPad.last.x,signPad.last.y);signPad.ctx.lineTo(p.x,p.y);signPad.ctx.stroke();
+        signPad.last=p;
+        if(!signPad.dirty){signPad.dirty=true;document.getElementById("signWrap").classList.remove("invalid");updateProgress()}
+      });
+      const end=()=>{signPad.drawing=false};
+      canvas.addEventListener("pointerup",end);canvas.addEventListener("pointercancel",end);canvas.addEventListener("pointerleave",end);
+      document.getElementById("signClear").onclick=()=>{
+        signPad.ctx.save();signPad.ctx.setTransform(1,0,0,1,0,0);signPad.ctx.clearRect(0,0,canvas.width,canvas.height);signPad.ctx.restore();
+        signPad.dirty=false;updateProgress();
+      };
+    }
+    function signatureDataUrl(){
+      if(!signPad.dirty)return"";
+      const out=document.createElement("canvas");out.width=520;out.height=170;
+      const ctx=out.getContext("2d");ctx.fillStyle="#fff";ctx.fillRect(0,0,out.width,out.height);
+      ctx.drawImage(signPad.canvas,0,0,out.width,out.height);
+      return out.toDataURL("image/png");
+    }
+
     function focusQuestion(id,message){const el=document.querySelector(`.dynamic-question[data-question-id="${cssEscape(id)}"]`);if(el){el.scrollIntoView({behavior:"smooth",block:"center"});setTimeout(()=>el.querySelector("input,textarea")?.focus(),250)}showToast(message,true);return false}
     function focusError(id,message){const el=document.getElementById(id);if(el){el.disabled=false;el.scrollIntoView({behavior:"smooth",block:"center"});setTimeout(()=>el.focus(),250)}showToast(message,true);return false}
     function value(id){return String(document.getElementById(id)?.value||"").trim()}
