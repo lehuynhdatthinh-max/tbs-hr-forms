@@ -260,7 +260,6 @@
           <div><label class="field-label">Ngày vào làm</label><input id="workDate" type="date" readonly></div>
           <div><label class="field-label required" for="leaveDate">Ngày nghỉ việc</label><input id="leaveDate" type="date"></div>
           <div><label class="field-label">Giới tính</label><input id="gender" type="text" readonly placeholder="Tự động điền"></div>
-          <div><label class="field-label">IDBP Báo cáo TCT</label><input id="idbp" type="text" readonly placeholder="Tự động điền"></div>
         </div>
       </section>
 
@@ -329,7 +328,7 @@
               <div><label class="field-label">Cách cập nhật</label><select id="employeeImportMode"><option value="merge">Gộp và cập nhật theo MSNV</option><option value="replace">Thay toàn bộ danh sách đang hoạt động</option></select></div>
               <button class="btn btn-success" id="importEmployeeButton" type="button" onclick="importEmployeeExcel()" disabled>Cập nhật danh sách</button>
             </div>
-            <div class="expected-columns"><b>Cột khuyến nghị:</b> MSNV/Mã số, Họ và tên hoặc Họ + Đệm và Tên, Bộ phận, Chức vụ, Vị trí công việc, Giới tính, IDBP và Ngày vào làm. Ngày nghỉ việc do người lao động tự chọn.</div>
+            <div class="expected-columns"><b>Bắt buộc:</b> MSNV/Mã số, Họ và tên (hoặc Họ + Đệm và Tên), Bộ phận, Ngày vào làm. <b>Không bắt buộc:</b> Chức vụ, Vị trí công việc, Giới tính, IDBP. Ngày nghỉ việc do người lao động tự chọn. Danh sách cũng tự cập nhật từ SafetyHub mỗi giờ.</div>
             <div class="import-summary" id="employeeImportSummary">Chưa chọn file Excel.</div>
             <div class="preview-wrap" id="employeePreviewWrap"><table class="preview-table"><thead><tr><th>MSNV</th><th>Họ và tên</th><th>Bộ phận</th><th>Chức vụ</th><th>Vị trí</th><th>Ngày vào làm</th></tr></thead><tbody id="employeePreviewBody"></tbody></table></div>
           </div>
@@ -575,7 +574,6 @@
         jobTitle:value("jobTitle"),
         workPosition:value("workPosition"),
         gender:value("gender"),
-        idbp:value("idbp"),
         leaveDate:value("leaveDate"),
         answers:collectAnswers(),
         signature:signatureDataUrl(),
@@ -624,7 +622,7 @@
 
     function clearEmployeeDetails(){
       state.employee=null;
-      ["fullName","department","jobTitle","workPosition","workDate","leaveDate","gender","idbp"].forEach(id=>document.getElementById(id).value="");
+      ["fullName","department","jobTitle","workPosition","workDate","leaveDate","gender"].forEach(id=>document.getElementById(id).value="");
       document.getElementById("leaveDate").min="";
       setLookupStatus("Chưa kiểm tra MSNV.","");updateProgress();
     }
@@ -638,7 +636,6 @@
       document.getElementById("workDate").value=employee.workDate||"";
       document.getElementById("leaveDate").min=employee.workDate||"";
       document.getElementById("gender").value=employee.gender||"";
-      document.getElementById("idbp").value=employee.idbp||"";
       if(employee.complete)setLookupStatus(`Đã xác nhận: ${employee.fullName} · ${employee.department}`,"ok");
       else setLookupStatus("Đã tìm thấy MSNV nhưng còn thiếu: "+(employee.missingFields||[]).join(", ")+".","warning");
       updateProgress();

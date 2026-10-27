@@ -6,12 +6,14 @@ Trang tĩnh (GitHub Pages) cho các biểu mẫu của phòng HCNS, cùng giao d
 |---|---|---|
 | `/` | Trang chọn biểu mẫu | – |
 | `/ho-so-du-tuyen/` | **Hồ sơ dự tuyển** (TBSL-NS-QT01-BM02), dựng theo mẫu Word | `apps-script/HoSoDuTuyen.gs` (cài theo `apps-script/HUONG-DAN.md`) |
-| `/exit/` | **Phiếu phỏng vấn nghỉ việc** (TBSL-NS-QT03-BM05), chuyển từ repo `core-value-survey` | Apps Script phiếu nghỉ việc đang chạy (không đổi) |
+| `/exit/` | **Phiếu phỏng vấn nghỉ việc** (TBSL-NS-QT03-BM05), chuyển từ repo `core-value-survey`; bắt buộc ký tên | Apps Script phiếu nghỉ việc (Code.gs + pdf_view.html gửi riêng, không để trong repo công khai vì có mật khẩu quản trị) |
+| `/quan-ly/` | **Trang quản lý HCNS**: gộp hồ sơ dự tuyển + phiếu nghỉ việc, lọc, xuất Excel, Xem / in từng người | Gọi API quản trị của hai Apps Script trên (đăng nhập email + mật khẩu) |
 
 Link sau khi bật GitHub Pages (Settings › Pages › Deploy from a branch › `main` / root):
 
 - https://lehuynhdatthinh-max.github.io/tbs-hr-forms/ho-so-du-tuyen/
 - https://lehuynhdatthinh-max.github.io/tbs-hr-forms/exit/
+- https://lehuynhdatthinh-max.github.io/tbs-hr-forms/quan-ly/ (HCNS)
 
 ## Hồ sơ dự tuyển
 

@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#E45620">
+  <meta name="robots" content="noindex">
+  <title>Quản lý hồ sơ nhân sự</title>
+  <style>
+    :root{
+      --primary:#E45620;--primary-d:#C24714;--accent:#4D4D4F;--success:#16A34A;--danger:#DC2626;
+      --border:#DADADC;--panel:#F2F2F3;--field:#8A8A8D;--tint:#FFF6F1;--tint-bd:#F3C9B5;--text:#1A1A1A;--muted:#6B6B6E;--radius:14px
+    }
+    *{box-sizing:border-box}
+    body{margin:0;min-height:100vh;font-family:Arial,Helvetica,sans-serif;color:var(--text);background:#fff;font-size:15px;line-height:1.5}
+    button,input,select{font:inherit}button{cursor:pointer}
+    .topbar{position:sticky;top:0;z-index:50;background:#fff;border-bottom:3px solid var(--primary)}
+    .topbar-in{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:62px;padding:6px 0;width:min(1240px,calc(100% - 28px));margin:0 auto}
+    .brand{display:flex;align-items:center;gap:14px;min-width:0}
+    .topbar-logo{display:block;height:46px;width:auto}
+    .brand-title{color:var(--accent);font-weight:700;font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .who{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:14px}
+    main{width:min(1240px,calc(100% - 28px));margin:0 auto 56px}
+    .card{margin-top:14px;padding:20px;border:1px solid var(--border);border-radius:var(--radius);background:#fff}
+    h1{margin:22px 0 4px;color:var(--accent);font-size:24px}
+    .sub{margin:0;color:var(--muted)}
+    label.field-label{display:block;margin-bottom:6px;color:var(--accent);font-size:14px;font-weight:700}
+    input[type="text"],input[type="email"],input[type="password"],input[type="date"],select{
+      width:100%;min-height:46px;padding:9px 13px;border:1.5px solid var(--field);border-radius:10px;outline:none;color:var(--text);background:#fff;font-size:16px
+    }
+    input:focus,select:focus{border-color:var(--primary);box-shadow:0 0 0 4px rgba(228,86,32,.22)}
+    .login{max-width:460px;margin:40px auto 0}
+    .login .grid{display:grid;gap:14px}
+    .note{margin-top:12px;padding:11px 13px;border-radius:11px;color:var(--accent);background:var(--panel);font-size:14px;line-height:1.5}
+    .note.error{color:#7F1D1D;background:#FDECEC}
+    .btn{min-height:44px;padding:0 18px;border:0;border-radius:10px;font-weight:700;font-size:15px;transition:background .15s;white-space:nowrap}
+    .btn:disabled{background:#B4B4B7!important;color:#fff!important;border-color:#B4B4B7!important;cursor:not-allowed}
+    .btn-primary{color:#fff;background:var(--primary)}.btn-primary:hover:not(:disabled){background:var(--primary-d)}
+    .btn-light{color:var(--accent);background:#fff;border:2px solid var(--accent)}.btn-light:hover:not(:disabled){background:var(--panel)}
+    .btn-sm{min-height:36px;padding:0 12px;font-size:14px}
+    .btn:focus-visible,.tab:focus-visible{outline:none;box-shadow:0 0 0 3px #fff,0 0 0 6px var(--accent)}
+    .tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:16px}
+    .tile{padding:16px;border:1px solid var(--border);border-radius:12px;background:#fff}
+    .tile-label{color:var(--muted);font-size:13px;font-weight:700}
+    .tile-value{margin-top:4px;color:var(--accent);font-size:30px;font-weight:700;line-height:1.15;font-variant-numeric:tabular-nums}
+    .tile-sub{color:var(--muted);font-size:13px}
+    .tile.accent{border-color:var(--tint-bd);background:var(--tint)}
+    .reasons{margin-top:12px}
+    .reasons h2{margin:0 0 10px;color:var(--accent);font-size:17px}
+    .bar-row{display:grid;grid-template-columns:minmax(0,260px) minmax(0,1fr) 44px;gap:10px;align-items:center;margin:7px 0;font-size:14px}
+    .bar-label{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .bar-track{height:12px;border-radius:999px;background:var(--panel);overflow:hidden}
+    .bar-fill{height:100%;border-radius:999px;background:var(--primary)}
+    .bar-count{text-align:right;font-weight:700;color:var(--accent);font-variant-numeric:tabular-nums}
+    .tabs{display:flex;gap:6px;margin-top:18px;padding:5px;border:1px solid var(--border);border-radius:13px;background:var(--panel);overflow:auto}
+    .tab{flex:1;min-width:170px;min-height:44px;padding:8px 12px;border:0;border-radius:10px;color:var(--accent);background:transparent;font-weight:700}
+    .tab.on{color:#fff;background:var(--accent)}
+    .tab .count{margin-left:6px;font-weight:400;opacity:.85}
+    .filters{display:grid;grid-template-columns:minmax(0,1.6fr) repeat(2,minmax(0,.8fr)) auto auto;gap:10px;align-items:end}
+    .summary-row{display:flex;justify-content:space-between;gap:10px;align-items:center;margin:14px 0 10px;color:var(--muted);font-size:14px;font-weight:700}
+    .table-wrap{overflow:auto;border:1px solid var(--border);border-radius:12px}
+    table{width:100%;border-collapse:collapse;min-width:960px}
+    th,td{padding:10px 12px;border-bottom:1px solid var(--border);text-align:left;vertical-align:top;font-size:14px}
+    th{position:sticky;top:0;color:#fff;background:var(--accent);font-size:13px;white-space:nowrap}
+    tbody tr:hover{background:#FAFAFA}
+    td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
+    .name{color:var(--accent);font-weight:700}
+    .meta{margin-top:2px;color:var(--muted);font-size:12px}
+    .pill{display:inline-block;padding:2px 9px;border-radius:999px;background:var(--panel);color:var(--accent);font-size:12px;font-weight:700;white-space:nowrap}
+    .pill.ok{color:#14532D;background:#E8F6EE}.pill.no{color:#7F1D1D;background:#FDECEC}.pill.new{color:#7A2E0B;background:#FFF1E8}
+    .empty{padding:28px;text-align:center;color:var(--muted)}
+    .mobile-list{display:none}
+    .m-card{padding:14px;border:1px solid var(--border);border-radius:12px;background:#fff}.m-card+.m-card{margin-top:10px}
+    .m-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+    .m-grid{display:grid;gap:6px;margin-top:10px;font-size:14px}
+    .m-grid span{color:var(--muted)}
+    .m-card .btn{margin-top:12px;width:100%}
+    .toast{position:fixed;z-index:2000;left:50%;bottom:calc(18px + env(safe-area-inset-bottom));display:none;width:min(520px,calc(100% - 26px));padding:14px 16px;border-radius:12px;color:#fff;background:var(--accent);box-shadow:0 18px 45px #0004;transform:translateX(-50%);font-weight:700;line-height:1.45}.toast.on{display:block}.toast.error{background:var(--danger)}
+    .loading{position:fixed;inset:0;z-index:3000;display:none;place-items:center;background:rgba(255,255,255,.7)}.loading.on{display:grid}
+    .spinner{width:46px;height:46px;border:5px solid var(--panel);border-top-color:var(--primary);border-radius:50%;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+    .hidden{display:none!important}
+    @media(max-width:860px){
+      .tiles{grid-template-columns:repeat(2,minmax(0,1fr))}
+      .filters{grid-template-columns:1fr 1fr}.filters .search{grid-column:1/-1}
+      .table-wrap{display:none}.mobile-list{display:block}
+      .bar-row{grid-template-columns:minmax(0,1fr) 44px}.bar-track{grid-column:1/-1;grid-row:2}
+    }
+    @media(max-width:560px){
+      .topbar-in,main{width:calc(100% - 24px)}.topbar-logo{height:38px}.brand-title{font-size:15px}
+      .who .email{display:none}
+      .card{padding:16px 13px}.tile-value{font-size:24px}
+      .filters{grid-template-columns:1fr}.filters .btn{width:100%}
+    }
+  </style>
+</head>
+<body>
+  <div class="loading" id="loading"><div class="spinner"></div></div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <header class="topbar">
+    <div class="topbar-in">
+      <div class="brand"><img class="topbar-logo" src="../images/logo.png" alt="TBS Logistics" width="79" height="46"><span class="brand-title">Quản lý hồ sơ nhân sự</span></div>
+      <div class="who hidden" id="who"><span class="email" id="whoEmail"></span><button class="btn btn-light btn-sm" type="button" id="logoutButton">Đăng xuất</button></div>
+    </div>
+  </header>
+
+  <main>
+    <!-- Đăng nhập -->
+    <section class="card login" id="loginCard">
+      <h1 style="margin-top:0">Đăng nhập HCNS</h1>
+      <p class="sub">Xem hồ sơ dự tuyển và phiếu phỏng vấn nghỉ việc.</p>
+      <form class="grid" id="loginForm" style="margin-top:16px" autocomplete="on">
+        <div><label class="field-label" for="email">Email quản trị</label><input id="email" type="email" autocomplete="username" required></div>
+        <div><label class="field-label" for="passcode">Mật khẩu</label><input id="passcode" type="password" autocomplete="current-password" required></div>
+        <button class="btn btn-primary" type="submit" id="loginButton">Đăng nhập</button>
+      </form>
+      <div class="note" id="loginNote">Thông tin đăng nhập chỉ giữ trong tab này; đóng tab là phải đăng nhập lại.</div>
+    </section>
+
+    <!-- Bảng điều khiển -->
+    <div class="hidden" id="dashboard">
+      <h1>Tổng quan</h1>
+      <p class="sub" id="loadedAt"></p>
+      <div class="tiles">
+        <div class="tile accent"><div class="tile-label">Hồ sơ dự tuyển · tháng này</div><div class="tile-value" id="tAppMonth">–</div><div class="tile-sub" id="tAppMonthSub"></div></div>
+        <div class="tile"><div class="tile-label">Hồ sơ dự tuyển · tổng</div><div class="tile-value" id="tAppTotal">–</div><div class="tile-sub" id="tAppNew"></div></div>
+        <div class="tile accent"><div class="tile-label">Nghỉ việc · tháng này</div><div class="tile-value" id="tExitMonth">–</div><div class="tile-sub" id="tExitMonthSub"></div></div>
+        <div class="tile"><div class="tile-label">Nghỉ việc · tổng</div><div class="tile-value" id="tExitTotal">–</div><div class="tile-sub" id="tExitSigned"></div></div>
+      </div>
+      <section class="card reasons" id="reasonsCard">
+        <h2>Lý do nghỉ việc (theo bộ lọc tab Nghỉ việc)</h2>
+        <div id="reasonBars"></div>
+      </section>
+
+      <div class="tabs" role="tablist">
+        <button class="tab on" type="button" role="tab" data-tab="apps">Hồ sơ dự tuyển<span class="count" id="cApps"></span></button>
+        <button class="tab" type="button" role="tab" data-tab="exits">Phỏng vấn nghỉ việc<span class="count" id="cExits"></span></button>
+      </div>
+
+      <section class="card">
+        <div class="filters">
+          <div class="search"><label class="field-label" for="search">Tìm</label><input id="search" type="text" placeholder="Họ tên, MSNV, số điện thoại, vị trí, mã…"></div>
+          <div><label class="field-label" for="fromDate">Từ ngày</label><input id="fromDate" type="date"></div>
+          <div><label class="field-label" for="toDate">Đến ngày</label><input id="toDate" type="date"></div>
+          <button class="btn btn-light" type="button" id="clearButton">Xóa lọc</button>
+          <button class="btn btn-primary" type="button" id="exportButton">Xuất Excel</button>
+        </div>
+        <div class="note error hidden" id="sourceError"></div>
+        <div class="summary-row"><span id="summary"></span><button class="btn btn-light btn-sm" type="button" id="reloadButton">Tải lại</button></div>
+        <div class="table-wrap"><table><thead id="thead"></thead><tbody id="tbody"></tbody></table></div>
+        <div class="mobile-list" id="mobileList"></div>
+      </section>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js" defer></script>
+  <script>
+    const EXIT_URL = "https://script.google.com/macros/s/AKfycbyR4KGVoh0I6TxZ8mLzee6miWEu1kMTsjCqfCBVjzc3_i0RhAYo_2EC6U9Nm85bpXv4FA/exec";
+    const APPS_URL = "https://script.google.com/macros/s/AKfycbzHiGVYD1JZG8er_DtugxD1Dkt4WspbQhdse4xx9OLIGseb0zXCUpTyuZlXw6GfkwV4mg/exec";
+
+    const state = { auth: null, tab: "apps", apps: [], exits: [], appsError: "", exitsError: "", reasonOptions: [], loadedAt: null };
+    const $ = id => document.getElementById(id);
+    const esc = v => String(v == null ? "" : v).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+    const fold = v => String(v || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/đ/g, "d");
+    function toast(message, isError) {
+      const el = $("toast"); el.textContent = message; el.className = "toast on" + (isError ? " error" : "");
+      clearTimeout(toast.t); toast.t = setTimeout(() => { el.className = "toast"; }, 4500);
+    }
+    function setLoading(on) { $("loading").classList.toggle("on", on); }
+
+    async function post(url, action, data) {
+      const body = new URLSearchParams();
+      body.append("action", action);
+      body.append("data", JSON.stringify(data || {}));
+      const response = await fetch(url, { method: "POST", body });
+      const text = await response.text();
+      let result;
+      try { result = JSON.parse(text); } catch (error) { throw new Error("Máy chủ trả về dữ liệu không hợp lệ."); }
+      if (!result.ok) throw new Error(result.error || result.message || "Yêu cầu không thành công.");
+      return result;
+    }
+
+    /* ---------- Đăng nhập: thử cả 2 máy chủ, vào được nếu đúng ít nhất 1 ---------- */
+    async function login(event) {
+      event.preventDefault();
+      const email = $("email").value.trim(), passcode = $("passcode").value;
+      if (!email || !passcode) return;
+      $("loginButton").disabled = true; setLoading(true);
+      const [apps, exits] = await Promise.allSettled([
+        post(APPS_URL, "adminLogin", { email, passcode }),
+        post(EXIT_URL, "adminLogin", { email, passcode })
+      ]);
+      setLoading(false); $("loginButton").disabled = false;
+      if (apps.status === "rejected" && exits.status === "rejected") {
+        $("loginNote").className = "note error";
+        $("loginNote").textContent = "Không đăng nhập được. Hồ sơ dự tuyển: " + apps.reason.message + " · Nghỉ việc: " + exits.reason.message;
+        return;
+      }
+      state.auth = { email, passcode, apps: apps.status === "fulfilled", exits: exits.status === "fulfilled" };
+      state.appsError = state.auth.apps ? "" : "Hồ sơ dự tuyển: " + apps.reason.message;
+      state.exitsError = state.auth.exits ? "" : "Phỏng vấn nghỉ việc: " + exits.reason.message;
+      $("passcode").value = "";
+      $("loginCard").classList.add("hidden"); $("dashboard").classList.remove("hidden");
+      $("who").classList.remove("hidden"); $("whoEmail").textContent = email;
+      await loadAll();
+    }
+    function logout() {
+      state.auth = null; state.apps = []; state.exits = [];
+      $("dashboard").classList.add("hidden"); $("who").classList.add("hidden"); $("loginCard").classList.remove("hidden");
+      $("loginNote").className = "note"; $("loginNote").textContent = "Đã đăng xuất.";
+    }
+
+    /* ---------- Tải dữ liệu ---------- */
+    async function loadAll() {
+      if (!state.auth) return;
+      setLoading(true);
+      const cred = { email: state.auth.email, passcode: state.auth.passcode };
+      const tasks = [
+        state.auth.apps ? post(APPS_URL, "listApplications", Object.assign({ filters: { limit: 1000 } }, cred)) : Promise.reject(new Error(state.appsError)),
+        state.auth.exits ? post(EXIT_URL, "listResponses", Object.assign({ filters: { limit: 1000 } }, cred)) : Promise.reject(new Error(state.exitsError)),
+        fetch(EXIT_URL + "?action=getFormConfig&v=" + Date.now(), { cache: "no-store" }).then(r => r.json())
+      ];
+      const [apps, exits, config] = await Promise.allSettled(tasks);
+      setLoading(false);
+      if (apps.status === "fulfilled") { state.apps = apps.value.result.rows || []; state.appsError = ""; }
+      else { state.apps = []; state.appsError = apps.reason.message.startsWith("Hồ sơ") ? apps.reason.message : "Hồ sơ dự tuyển: " + apps.reason.message; }
+      if (exits.status === "fulfilled") { state.exits = exits.value.result.rows || []; state.exitsError = ""; }
+      else { state.exits = []; state.exitsError = exits.reason.message.startsWith("Phỏng") ? exits.reason.message : "Phỏng vấn nghỉ việc: " + exits.reason.message; }
+      if (config.status === "fulfilled" && config.value && config.value.ok) {
+        const q1 = (config.value.config.schema.sections || []).flatMap(s => s.questions || []).find(q => q.id === "q1");
+        state.reasonOptions = q1 ? q1.options || [] : [];
+      }
+      state.loadedAt = new Date();
+      renderAll();
+    }
+
+    /* ---------- Lọc ---------- */
+    function filtered(kind) {
+      const search = fold($("search").value).trim(), from = $("fromDate").value, to = $("toDate").value;
+      const rows = kind === "apps" ? state.apps : state.exits;
+      return rows.filter(r => {
+        if (from && (!r.submittedDate || r.submittedDate < from)) return false;
+        if (to && (!r.submittedDate || r.submittedDate > to)) return false;
+        if (!search) return true;
+        const hay = kind === "apps"
+          ? [r.code, r.fullName, r.position1, r.position2, r.mobile, r.email, r.idNumber, r.status, r.sources]
+          : [r.fullName, r.msnv, r.department, r.jobTitle, r.workPosition, r.responseId, r.reasons];
+        return fold(hay.join(" ")).includes(search);
+      });
+    }
+
+    /* ---------- Hiển thị ---------- */
+    function monthKey(d) { return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0"); }
+    function renderTiles() {
+      const now = new Date(), month = monthKey(now);
+      const prev = monthKey(new Date(now.getFullYear(), now.getMonth() - 1, 1));
+      const inMonth = (rows, m) => rows.filter(r => String(r.submittedDate || "").slice(0, 7) === m).length;
+      $("tAppMonth").textContent = state.auth.apps ? inMonth(state.apps, month) : "–";
+      $("tAppMonthSub").textContent = state.auth.apps ? "Tháng trước: " + inMonth(state.apps, prev) : "Chưa có quyền";
+      $("tAppTotal").textContent = state.auth.apps ? state.apps.length : "–";
+      const fresh = state.apps.filter(r => !r.status || /^mới$/i.test(r.status)).length;
+      $("tAppNew").textContent = state.auth.apps ? fresh + " chưa xử lý (Trạng thái: Mới)" : "";
+      $("tExitMonth").textContent = state.auth.exits ? inMonth(state.exits, month) : "–";
+      $("tExitMonthSub").textContent = state.auth.exits ? "Tháng trước: " + inMonth(state.exits, prev) : "Chưa có quyền";
+      $("tExitTotal").textContent = state.auth.exits ? state.exits.length : "–";
+      const signed = state.exits.filter(r => r.signed).length;
+      $("tExitSigned").textContent = state.auth.exits ? signed + " phiếu có chữ ký" : "";
+      $("loadedAt").textContent = "Cập nhật lúc " + state.loadedAt.toLocaleString("vi-VN") + ".";
+      $("cApps").textContent = state.auth.apps ? "(" + state.apps.length + ")" : "";
+      $("cExits").textContent = state.auth.exits ? "(" + state.exits.length + ")" : "";
+    }
+    function renderReasons() {
+      const rows = filtered("exits");
+      const options = state.reasonOptions.length ? state.reasonOptions : [];
+      const counts = options.map(option => ({ option, count: rows.filter(r => String(r.reasons || "").includes(option)).length }))
+        .filter(x => x.count).sort((a, b) => b.count - a.count);
+      $("reasonsCard").classList.toggle("hidden", !state.auth.exits);
+      if (!counts.length) { $("reasonBars").innerHTML = '<div class="empty">Chưa có phiếu nào trong bộ lọc này.</div>'; return; }
+      const max = counts[0].count;
+      $("reasonBars").innerHTML = counts.map(x =>
+        '<div class="bar-row"><span class="bar-label" title="' + esc(x.option) + '">' + esc(x.option) + '</span>' +
+        '<div class="bar-track"><div class="bar-fill" style="width:' + Math.max(4, Math.round(x.count / max * 100)) + '%"></div></div>' +
+        '<span class="bar-count">' + x.count + '</span></div>').join("") +
+        '<div class="meta" style="margin-top:8px">Trên ' + rows.length + ' phiếu; một phiếu có thể chọn nhiều lý do.</div>';
+    }
+    function statusPill(status) {
+      const s = String(status || "Mới");
+      const cls = /^mới$/i.test(s) ? "new" : /đạt|nhận|ok/i.test(s) && !/không/i.test(s) ? "ok" : /không|loại|từ chối/i.test(s) ? "no" : "";
+      return '<span class="pill ' + cls + '">' + esc(s) + '</span>';
+    }
+    function viewButton(url, label) {
+      return url ? '<a class="btn btn-primary btn-sm" style="display:inline-flex;align-items:center;text-decoration:none" target="_blank" rel="noopener" href="' + esc(url) + '">' + (label || "Xem / in") + '</a>' : "";
+    }
+    function renderTable() {
+      const kind = state.tab, rows = filtered(kind);
+      const error = kind === "apps" ? state.appsError : state.exitsError;
+      $("sourceError").classList.toggle("hidden", !error); $("sourceError").textContent = error;
+      const total = (kind === "apps" ? state.apps : state.exits).length;
+      $("summary").textContent = rows.length === total ? rows.length + " " + (kind === "apps" ? "hồ sơ" : "phiếu") : rows.length + " / " + total + " " + (kind === "apps" ? "hồ sơ" : "phiếu") + " khớp bộ lọc";
+      if (kind === "apps") {
+        $("thead").innerHTML = "<tr><th>Ngày nộp</th><th>Mã hồ sơ</th><th>Họ và tên</th><th>Vị trí ứng tuyển</th><th>Di động</th><th>Ngày nhận việc</th><th>Trạng thái</th><th></th></tr>";
+        $("tbody").innerHTML = rows.length ? rows.map(r => "<tr>" +
+          '<td class="num">' + esc(r.submittedAt) + "</td>" +
+          '<td class="num">' + esc(r.code) + "</td>" +
+          '<td><div class="name">' + esc(r.fullName) + '</div><div class="meta">' + esc([r.gender, r.dob].filter(Boolean).join(" · ")) + "</div></td>" +
+          "<td>" + esc(r.position1) + (r.position2 ? '<div class="meta">Ưu tiên 2: ' + esc(r.position2) + "</div>" : "") + "</td>" +
+          '<td class="num">' + esc(r.mobile) + "</td>" +
+          '<td class="num">' + esc(r.startDate) + "</td>" +
+          "<td>" + statusPill(r.status) + (r.note ? '<div class="meta">' + esc(r.note) + "</div>" : "") + "</td>" +
+          "<td>" + viewButton(r.viewUrl) + "</td></tr>").join("") : '<tr><td colspan="8"><div class="empty">Không có hồ sơ phù hợp.</div></td></tr>';
+        $("mobileList").innerHTML = rows.length ? rows.map(r => '<article class="m-card"><div class="m-top"><div><div class="name">' + esc(r.fullName) + '</div><div class="meta">' + esc(r.code) + " · " + esc(r.submittedAt) + "</div></div>" + statusPill(r.status) + "</div>" +
+          '<div class="m-grid"><div><span>Vị trí:</span> ' + esc(r.position1) + "</div><div><span>Di động:</span> " + esc(r.mobile) + "</div><div><span>Nhận việc:</span> " + esc(r.startDate || "–") + "</div></div>" +
+          viewButton(r.viewUrl, "Xem / in hồ sơ") + "</article>").join("") : '<div class="empty">Không có hồ sơ phù hợp.</div>';
+      } else {
+        $("thead").innerHTML = "<tr><th>Ngày gửi</th><th>MSNV</th><th>Họ và tên</th><th>Bộ phận / Chức vụ</th><th>Ngày vào làm</th><th>Ngày nghỉ việc</th><th>Lý do chính</th><th>Chữ ký</th><th></th></tr>";
+        $("tbody").innerHTML = rows.length ? rows.map(r => "<tr>" +
+          '<td class="num">' + esc(r.submittedAt) + "</td>" +
+          '<td class="num">' + esc(r.msnv) + "</td>" +
+          '<td><div class="name">' + esc(r.fullName) + '</div><div class="meta">' + esc(r.gender) + "</div></td>" +
+          "<td>" + esc(r.department) + '<div class="meta">' + esc([r.jobTitle, r.workPosition].filter(Boolean).join(" · ")) + "</div></td>" +
+          '<td class="num">' + esc(r.workDate) + "</td>" +
+          '<td class="num">' + esc(r.leaveDate) + "</td>" +
+          "<td>" + esc(r.reasons) + (r.reasonOther ? '<div class="meta">Khác: ' + esc(r.reasonOther) + "</div>" : "") + "</td>" +
+          "<td>" + (r.signed ? '<span class="pill ok">Đã ký</span>' : '<span class="pill">Chưa có</span>') + "</td>" +
+          "<td>" + viewButton(r.pdfUrl) + "</td></tr>").join("") : '<tr><td colspan="9"><div class="empty">Không có phiếu phù hợp.</div></td></tr>';
+        $("mobileList").innerHTML = rows.length ? rows.map(r => '<article class="m-card"><div class="m-top"><div><div class="name">' + esc(r.fullName) + '</div><div class="meta">MSNV ' + esc(r.msnv) + " · " + esc(r.submittedAt) + "</div></div>" + (r.signed ? '<span class="pill ok">Đã ký</span>' : "") + "</div>" +
+          '<div class="m-grid"><div><span>Bộ phận:</span> ' + esc(r.department) + "</div><div><span>Nghỉ việc:</span> " + esc(r.leaveDate) + "</div><div><span>Lý do:</span> " + esc(r.reasons || "–") + "</div></div>" +
+          viewButton(r.pdfUrl, "Xem / in phiếu") + "</article>").join("") : '<div class="empty">Không có phiếu phù hợp.</div>';
+      }
+    }
+    function renderAll() { renderTiles(); renderReasons(); renderTable(); }
+
+    /* ---------- Xuất Excel (đúng danh sách đang lọc) ---------- */
+    function exportExcel() {
+      if (!window.XLSX) return toast("Không tải được thư viện Excel. Kiểm tra mạng rồi thử lại.", true);
+      const kind = state.tab, rows = filtered(kind);
+      if (!rows.length) return toast("Không có dòng nào để xuất.", true);
+      const data = kind === "apps"
+        ? rows.map(r => ({ "Ngày nộp": r.submittedAt, "Mã hồ sơ": r.code, "Họ và tên": r.fullName, "Ngày sinh": r.dob, "Giới tính": r.gender,
+            "Vị trí ưu tiên 1": r.position1, "Vị trí ưu tiên 2": r.position2, "Lương mong đợi": r.salary, "Ngày có thể nhận việc": r.startDate,
+            "Di động": r.mobile, "Email": r.email, "Số CMND/CCCD": r.idNumber, "Địa chỉ thường trú": r.address, "Từng làm ở TBS": r.everTBS,
+            "Biết tin qua": r.sources, "Trạng thái": r.status, "Ghi chú HCNS": r.note, "Xem / in": r.viewUrl }))
+        : rows.map(r => ({ "Ngày gửi": r.submittedAt, "MSNV": r.msnv, "Họ và tên": r.fullName, "Giới tính": r.gender, "Bộ phận": r.department,
+            "Chức vụ": r.jobTitle, "Vị trí công việc": r.workPosition, "Ngày vào làm": r.workDate, "Ngày nghỉ việc": r.leaveDate,
+            "Lý do nghỉ việc": r.reasons, "Lý do khác": r.reasonOther, "Chữ ký": r.signed ? "Đã ký" : "", "Mã phản hồi": r.responseId, "Xem / in": r.pdfUrl }));
+      const sheet = XLSX.utils.json_to_sheet(data);
+      sheet["!cols"] = Object.keys(data[0]).map(k => ({ wch: Math.min(48, Math.max(k.length + 2, ...data.slice(0, 200).map(d => String(d[k] || "").length + 1))) }));
+      const book = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(book, sheet, kind === "apps" ? "Hồ sơ dự tuyển" : "Phỏng vấn nghỉ việc");
+      const stamp = new Date().toISOString().slice(0, 10);
+      XLSX.writeFile(book, (kind === "apps" ? "ho-so-du-tuyen-" : "phong-van-nghi-viec-") + stamp + ".xlsx");
+    }
+
+    /* ---------- Khởi động ---------- */
+    $("loginForm").addEventListener("submit", login);
+    $("logoutButton").onclick = logout;
+    $("reloadButton").onclick = loadAll;
+    $("exportButton").onclick = exportExcel;
+    $("clearButton").onclick = () => { $("search").value = ""; $("fromDate").value = ""; $("toDate").value = ""; renderReasons(); renderTable(); };
+    ["search", "fromDate", "toDate"].forEach(id => $(id).addEventListener("input", () => { clearTimeout(renderTable.t); renderTable.t = setTimeout(() => { renderReasons(); renderTable(); }, 150); }));
+    document.querySelectorAll(".tab").forEach(tab => tab.onclick = () => {
+      state.tab = tab.dataset.tab;
+      document.querySelectorAll(".tab").forEach(t => t.classList.toggle("on", t === tab));
+      renderTable();
+    });
+  </script>
+</body>
+</html>

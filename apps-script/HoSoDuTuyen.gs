@@ -11,11 +11,17 @@
  * - Nộp lại cùng submissionId (trang tự thử lại khi mất mạng) không tạo hồ sơ trùng.
  */
 var HSDT = {
-  VERSION: '1.0.0',
+  VERSION: '1.1.0',
   SHEET: 'Hồ sơ dự tuyển',
   FOLDER_NAME: 'Hồ sơ dự tuyển - Ảnh & chữ ký',
   FOLDER_PROP: 'HSDT_FOLDER_ID',
   NOTIFY_PROP: 'HSDT_NOTIFY_EMAILS',
+  // Trang quản lý HCNS (quan-ly/): đăng nhập bằng email + mật khẩu đặt trong Thuộc tính tập lệnh (không ghi vào mã).
+  ADMIN_EMAILS_PROP: 'HSDT_ADMIN_EMAILS',
+  ADMIN_PASSCODE_PROP: 'HSDT_ADMIN_PASSCODE',
+  LOGIN_MAX_FAILS: 5,
+  LOGIN_LOCK_SECONDS: 900,
+  LIST_LIMIT: 1000,
   TIME_ZONE: 'Asia/Ho_Chi_Minh',
   LOGO_URL: 'https://lehuynhdatthinh-max.github.io/tbs-hr-forms/images/logo.png',
   MAX_IMAGE_BYTES: 1500000,
@@ -90,10 +96,19 @@ function doGet(e) {
 function doPost(e) {
   var p = (e && e.parameter) || {};
   try {
-    if (p.action !== 'submit') return hsdtJson_({ ok: false, message: 'Yêu cầu không hợp lệ.' });
     var data = JSON.parse(p.data || '{}');
-    return hsdtJson_(hsdtSubmit_(data));
+    if (p.action === 'submit') return hsdtJson_(hsdtSubmit_(data));
+    if (p.action === 'adminLogin') {
+      hsdtVerifyAdmin_(data.email, data.passcode);
+      return hsdtJson_({ ok: true });
+    }
+    if (p.action === 'listApplications') {
+      hsdtVerifyAdmin_(data.email, data.passcode);
+      return hsdtJson_({ ok: true, result: hsdtList_(data.filters || {}) });
+    }
+    return hsdtJson_({ ok: false, message: 'Yêu cầu không hợp lệ.' });
   } catch (error) {
+    if (error && error.adminError) return hsdtJson_({ ok: false, message: error.message });
     console.error(error && error.stack || error);
     return hsdtJson_({ ok: false, retry: true, message: 'Máy chủ gặp lỗi, vui lòng thử lại. (' + (error && error.message || error) + ')' });
   }
@@ -101,6 +116,89 @@ function doPost(e) {
 
 function hsdtJson_(obj) {
   return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON);
+}
+
+/* =================== Trang quản lý HCNS =================== */
+
+function hsdtAdminError_(message) {
+  var error = new Error(message);
+  error.adminError = true;
+  return error;
+}
+
+/** Email nằm trong HSDT_ADMIN_EMAILS (cách nhau dấu phẩy) và đúng HSDT_ADMIN_PASSCODE. Sai 5 lần / 15 phút thì khóa email đó. */
+function hsdtVerifyAdmin_(email, passcode) {
+  var props = PropertiesService.getScriptProperties();
+  var allowed = String(props.getProperty(HSDT.ADMIN_EMAILS_PROP) || '').toLowerCase().split(/[,;\s]+/).filter(Boolean);
+  var secret = String(props.getProperty(HSDT.ADMIN_PASSCODE_PROP) || '');
+  if (!allowed.length || !secret) throw hsdtAdminError_('Máy chủ hồ sơ dự tuyển chưa đặt tài khoản quản trị (HSDT_ADMIN_EMAILS / HSDT_ADMIN_PASSCODE).');
+  var e = String(email || '').toLowerCase().trim();
+  if (!e) throw hsdtAdminError_('Vui lòng nhập email quản trị.');
+  var cache = CacheService.getScriptCache();
+  var failKey = 'hsdtAdminFail_' + Utilities.base64EncodeWebSafe(e).slice(0, 200);
+  var fails = Number(cache.get(failKey) || 0);
+  if (fails >= HSDT.LOGIN_MAX_FAILS) throw hsdtAdminError_('Đăng nhập sai quá nhiều lần. Vui lòng thử lại sau 15 phút.');
+  if (allowed.indexOf(e) === -1 || String(passcode || '').trim() !== secret.trim()) {
+    cache.put(failKey, String(fails + 1), HSDT.LOGIN_LOCK_SECONDS);
+    throw hsdtAdminError_(allowed.indexOf(e) === -1 ? 'Email này không có quyền quản trị.' : 'Mật khẩu quản trị không đúng.');
+  }
+  if (fails) cache.remove(failKey);
+}
+
+/** Danh sách hồ sơ cho trang quản lý: mới nhất trước. filters = { search, fromDate, toDate (yyyy-MM-dd), limit }. */
+function hsdtList_(filters) {
+  var sheet = hsdtSheet_();
+  var info = hsdtHeaderMap_(sheet);
+  var last = sheet.getLastRow();
+  if (last < 2) return { total: 0, returned: 0, rows: [] };
+  var values = sheet.getRange(2, 1, last - 1, info.headers.length).getValues();
+  var raw = function (row, name) { var c = info.col[name]; return c ? row[c - 1] : ''; };
+  var col = function (row, name) { return hsdtCellString_(raw(row, name)); };
+  var fold = function (v) {
+    return String(v || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/đ/g, 'd');
+  };
+  var search = fold(filters.search).trim();
+  var from = String(filters.fromDate || ''), to = String(filters.toDate || '');
+  var limit = Math.max(1, Math.min(HSDT.LIST_LIMIT, Number(filters.limit) || HSDT.LIST_LIMIT));
+  var base = ScriptApp.getService().getUrl();
+
+  var rows = values.map(function (row) {
+    var id = String(col(row, 'ID') || '').trim();
+    var ts = raw(row, 'Thời gian nộp');
+    var when = ts instanceof Date ? ts : new Date(ts);
+    var ok = !isNaN(when.getTime());
+    return {
+      id: id,
+      code: String(col(row, 'Mã hồ sơ') || ''),
+      submittedDate: ok ? Utilities.formatDate(when, HSDT.TIME_ZONE, 'yyyy-MM-dd') : '',
+      submittedAt: ok ? Utilities.formatDate(when, HSDT.TIME_ZONE, 'dd/MM/yyyy HH:mm') : String(ts || ''),
+      fullName: String(col(row, 'Họ và tên') || ''),
+      dob: String(col(row, 'Ngày sinh') || ''),
+      gender: String(col(row, 'Giới tính') || ''),
+      position1: String(col(row, 'Vị trí ưu tiên 1') || ''),
+      position2: String(col(row, 'Vị trí ưu tiên 2') || ''),
+      salary: String(col(row, 'Lương mong đợi') || ''),
+      startDate: String(col(row, 'Ngày có thể nhận việc') || ''),
+      mobile: String(col(row, 'Di động') || ''),
+      email: String(col(row, 'Email') || ''),
+      idNumber: String(col(row, 'Số CMND/CCCD') || ''),
+      address: String(col(row, 'Địa chỉ thường trú') || ''),
+      everTBS: String(col(row, 'Từng làm ở TBS') || ''),
+      sources: String(col(row, 'Biết tin qua') || ''),
+      status: String(col(row, 'Trạng thái') || ''),
+      note: String(col(row, 'Ghi chú HCNS') || ''),
+      viewUrl: id ? base + '?action=view&id=' + encodeURIComponent(id) : ''
+    };
+  }).filter(function (r) {
+    if (!r.id) return false;
+    if (from && (!r.submittedDate || r.submittedDate < from)) return false;
+    if (to && (!r.submittedDate || r.submittedDate > to)) return false;
+    if (search && fold([r.code, r.fullName, r.position1, r.position2, r.mobile, r.email, r.idNumber, r.status].join(' ')).indexOf(search) === -1) return false;
+    return true;
+  });
+  rows.reverse(); // dòng mới nộp nằm cuối sheet
+  rows.sort(function (a, b) { return String(b.submittedDate).localeCompare(String(a.submittedDate)); });
+  return { total: rows.length, returned: Math.min(rows.length, limit), rows: rows.slice(0, limit) };
 }
 
 /* =================== Nhận hồ sơ =================== */
@@ -224,10 +322,19 @@ function hsdtSaveImage_(folder, dataUrl, name) {
   return folder.createFile(Utilities.newBlob(bytes, m[1], name + ext)).getId();
 }
 
-/** Chống chèn công thức: chuỗi bắt đầu bằng = + - @ được ghi như chữ. */
+/**
+ * Ghi mọi chuỗi dưới dạng chữ (thêm dấu ' — Sheets không hiển thị): chống chèn công thức (= + - @) và giữ nguyên
+ * số 0 đầu của số điện thoại / CMND / BHXH, ngày dạng dd/MM/yyyy không bị đổi thành kiểu ngày.
+ */
 function hsdtCellText_(value) {
   var s = value === null || value === undefined ? '' : String(value);
-  return /^[=+\-@]/.test(s) ? "'" + s : s;
+  return s ? "'" + s : s;
+}
+
+/** Ô ngày cũ (nếu Sheets đã tự đổi) → dd/MM/yyyy; ô khác → chuỗi. */
+function hsdtCellString_(value) {
+  if (value instanceof Date && !isNaN(value.getTime())) return Utilities.formatDate(value, HSDT.TIME_ZONE, 'dd/MM/yyyy');
+  return value === null || value === undefined ? '' : String(value);
 }
 
 function hsdtLinkFormula_(url, label) {

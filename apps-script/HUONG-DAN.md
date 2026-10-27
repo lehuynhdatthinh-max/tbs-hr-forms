@@ -15,6 +15,19 @@ Trang `ho-so-du-tuyen/` cần một Apps Script riêng (không dùng chung với
 
 Sửa script sau này: **Triển khai › Quản lý triển khai** › bút chì › **Phiên bản mới** › **Triển khai** (giữ nguyên URL).
 
+## Trang quản lý HCNS (`quan-ly/`, bản 1.1.0)
+
+Trang https://lehuynhdatthinh-max.github.io/tbs-hr-forms/quan-ly/ gộp **hồ sơ dự tuyển** và **phiếu phỏng vấn nghỉ việc**:
+tổng quan theo tháng, lý do nghỉ việc, tìm / lọc theo ngày, xuất Excel, nút **Xem / in** (bản PDF) cho từng người.
+
+1. Dán đè `HoSoDuTuyen.gs` bản 1.1.0 › **Lưu**.
+2. ⚙ **Cài đặt dự án › Thuộc tính tập lệnh › Thêm thuộc tính** (đặt giống tài khoản quản trị phiếu nghỉ việc để đăng nhập một lần cho cả hai):
+   - `HSDT_ADMIN_EMAILS` = email quản trị (nhiều email cách nhau dấu phẩy)
+   - `HSDT_ADMIN_PASSCODE` = mật khẩu quản trị
+3. **Triển khai › Quản lý triển khai** › bút chì › **Phiên bản mới** › **Triển khai** (giữ nguyên URL).
+
+Sai mật khẩu 5 lần trong 15 phút thì email đó bị khóa 15 phút.
+
 ## Dữ liệu nằm ở đâu
 
 - Mỗi hồ sơ là **một dòng** trong tab **Hồ sơ dự tuyển**: các cột chính (họ tên, ngày sinh, vị trí, di động, CMND/CCCD…) để lọc nhanh, toàn bộ nội dung ở cột **Dữ liệu (JSON)**.
