@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#E45620">
+  <title>Biểu mẫu nhân sự</title>
+  <style>
+    :root{--primary:#E45620;--primary-d:#C24714;--accent:#4D4D4F;--border:#DADADC;--panel:#F2F2F3;--tint:#FFF6F1;--text:#1A1A1A;--muted:#6B6B6E}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Arial,Helvetica,sans-serif;color:var(--text);background:#fff;font-size:16px;line-height:1.5}
+    .topbar{background:#fff;border-bottom:3px solid var(--primary)}
+    .topbar-in{display:flex;align-items:center;min-height:66px;padding:7px 0;width:min(900px,calc(100% - 32px));margin:0 auto}
+    .topbar-logo{display:block;height:52px;width:auto}
+    main{width:min(900px,calc(100% - 32px));margin:0 auto 56px}
+    .eyebrow{margin:26px 0 4px;color:var(--muted);font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+    h1{margin:0;color:var(--accent);font-size:26px;line-height:1.35}
+    .sub{margin:6px 0 22px;color:var(--muted)}
+    .cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+    .form-card{display:flex;flex-direction:column;gap:8px;padding:22px;border:1px solid var(--border);border-radius:14px;color:inherit;text-decoration:none;background:#fff;transition:border-color .15s,background .15s}
+    .form-card:hover{border-color:var(--primary);background:var(--tint)}
+    .form-card:focus-visible{outline:none;box-shadow:0 0 0 3px #fff,0 0 0 6px var(--accent)}
+    .icon{display:grid;place-items:center;width:46px;height:46px;border-radius:12px;background:var(--primary);color:#fff;font-size:24px}
+    .form-card h2{margin:6px 0 0;color:var(--accent);font-size:20px}
+    .form-card p{margin:0;color:var(--muted);font-size:15px}
+    .code{margin-top:auto;padding-top:8px;color:var(--muted);font-size:13px}
+    .go{color:var(--primary-d);font-weight:700}
+    @media(max-width:640px){.cards{grid-template-columns:1fr}.topbar-logo{height:44px}h1{font-size:22px}}
+  </style>
+</head>
+<body>
+  <header class="topbar"><div class="topbar-in"><img class="topbar-logo" src="images/logo.png" alt="TBS Logistics" width="89" height="52"></div></header>
+  <main>
+    <p class="eyebrow">TBS Logistics · Phòng HCNS</p>
+    <h1>Biểu mẫu nhân sự</h1>
+    <p class="sub">Chọn biểu mẫu cần điền.</p>
+    <div class="cards">
+      <a class="form-card" href="ho-so-du-tuyen/">
+        <span class="icon" aria-hidden="true">📝</span>
+        <h2>Hồ sơ dự tuyển</h2>
+        <p>Dành cho ứng viên: thông tin cá nhân, học vấn, kinh nghiệm làm việc, tham chiếu.</p>
+        <span class="code">TBSL-NS-QT01-BM02 · <span class="go">Điền hồ sơ →</span></span>
+      </a>
+      <a class="form-card" href="exit/">
+        <span class="icon" aria-hidden="true">💬</span>
+        <h2>Phỏng vấn nghỉ việc</h2>
+        <p>Dành cho nhân viên nghỉ việc: chia sẻ ý kiến để cải thiện môi trường làm việc.</p>
+        <span class="code">TBSL-NS-QT03-BM05 · <span class="go">Điền phiếu →</span></span>
+      </a>
+    </div>
+  </main>
+</body>
+</html>

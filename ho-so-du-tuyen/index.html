@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#E45620">
+  <title>Hồ sơ dự tuyển</title>
+  <style>
+    :root{
+      /* Nhận diện TBS Logistics 2026 (giống SafetyHub và phiếu nghỉ việc): cam #E45620, xám than #4D4D4F, chữ #1A1A1A, Arial. */
+      --primary:#E45620;--primary-d:#C24714;--accent:#4D4D4F;--success:#16A34A;--danger:#DC2626;
+      --border:#DADADC;--panel:#F2F2F3;--field:#8A8A8D;--tint:#FFF6F1;--tint-bd:#F3C9B5;--text:#1A1A1A;--muted:#6B6B6E;--radius:14px
+    }
+    *{box-sizing:border-box}
+    html{-webkit-text-size-adjust:100%;text-size-adjust:100%;scroll-behavior:smooth}
+    body{margin:0;min-height:100vh;font-family:Arial,Helvetica,sans-serif;color:var(--text);background:#fff;font-size:16px;line-height:1.5}
+    button,input,select,textarea{font:inherit}button{cursor:pointer}
+    .topbar{position:sticky;top:0;z-index:50;background:#fff;border-bottom:3px solid var(--primary)}
+    .topbar-in{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:66px;padding:7px 0;width:min(1000px,calc(100% - 28px));margin:0 auto}
+    .topbar-logo{display:block;height:52px;width:auto}
+    .topbar-link{min-height:40px;padding:8px 14px;border:1.5px solid var(--accent);border-radius:10px;color:var(--accent);background:#fff;font-weight:700;font-size:14px;text-decoration:none;display:inline-flex;align-items:center}
+    .app{width:min(1000px,calc(100% - 28px));margin:0 auto 56px;padding-bottom:env(safe-area-inset-bottom)}
+    .intro{padding:22px 0 6px}
+    .eyebrow{margin:0 0 4px;color:var(--muted);font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+    .intro h1{margin:0;font-size:25px;line-height:1.4;color:var(--accent)}
+    .intro-sub{margin:6px 0 0;color:var(--muted);font-size:15px}
+    .facts{list-style:none;margin:12px 0 0;padding:0;display:flex;flex-wrap:wrap;gap:8px}
+    .fact{display:inline-flex;align-items:center;padding:6px 12px;border-radius:999px;background:var(--panel);color:var(--accent);font-size:14px}
+    .notice{display:flex;gap:10px;align-items:flex-start;margin-top:12px;padding:12px 14px;border:1px solid var(--border);border-radius:12px;background:var(--panel);color:var(--accent);font-size:14px;line-height:1.5}
+    .notice.warn{color:#7A2E0B;background:#FFF1E8;border-color:var(--tint-bd)}
+    .notice .btn{margin-left:auto}
+    .progress-wrap{position:sticky;top:72px;z-index:40;margin:13px 0;padding:8px;border:1px solid var(--border);border-radius:12px;background:#fff}
+    .progress{height:8px;overflow:hidden;border-radius:999px;background:var(--panel)}.progress-bar{width:0;height:100%;border-radius:inherit;background:var(--primary);transition:width .2s}
+    .progress-text{display:flex;justify-content:space-between;margin-top:7px;color:var(--accent);font-size:14px;font-weight:700}
+    .card{margin-top:12px;padding:20px;border:1px solid var(--border);border-radius:var(--radius);background:#fff;scroll-margin-top:150px}
+    .section-title{display:flex;align-items:center;gap:12px;margin-bottom:17px}
+    .section-no{flex:0 0 auto;display:grid;place-items:center;min-width:36px;height:36px;padding:0 6px;border-radius:999px;color:#fff;background:var(--primary);font-weight:700;font-size:15px}
+    .section-title h2{margin:0;color:var(--accent);font-size:20px;line-height:1.3}.section-title p{margin:4px 0 0;color:var(--muted);font-size:15px;line-height:1.5}
+    .sub-title{margin:22px 0 10px;color:var(--accent);font-size:17px;font-weight:700}.sub-title:first-of-type{margin-top:4px}
+    .sub-title small{display:block;color:var(--muted);font-size:14px;font-weight:400}
+    .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.grid3{grid-template-columns:repeat(3,minmax(0,1fr))}.full{grid-column:1/-1}
+    .personal-top{display:grid;grid-template-columns:minmax(0,1fr) 150px;gap:16px;align-items:start}
+    label.field-label,.field-label{display:block;margin-bottom:7px;color:var(--accent);font-size:15px;font-weight:700}.required:after{content:" *";color:var(--danger)}
+    input[type="text"],input[type="date"],input[type="month"],input[type="email"],input[type="tel"],select,textarea{
+      width:100%;min-height:48px;padding:10px 14px;border:1.5px solid var(--field);border-radius:10px;outline:none;color:var(--text);background:#fff;font-size:16px
+    }
+    textarea{min-height:90px;resize:vertical;line-height:1.5}
+    input::placeholder,textarea::placeholder{color:#8F8F92}
+    input:focus,select:focus,textarea:focus{border-color:var(--primary);box-shadow:0 0 0 4px rgba(228,86,32,.22)}
+    .invalid input,.invalid textarea,.invalid select,input.invalid,textarea.invalid{border-color:var(--danger);background:#FFF7F7}
+    .invalid .choice-row,.choice-row.invalid{outline:2px solid var(--danger);outline-offset:4px;border-radius:10px}
+    .error-text{display:none;margin-top:6px;color:#B91C1C;font-size:14px;font-weight:700}.invalid>.error-text{display:block}
+    .choice-row{display:flex;flex-wrap:wrap;gap:8px}
+    .choice{display:inline-flex;align-items:center;gap:9px;min-height:46px;padding:9px 13px;border:2px solid var(--panel);border-radius:10px;background:var(--panel);cursor:pointer;font-size:15px}
+    .choice:hover{background:#E9E9EB;border-color:#E9E9EB}
+    .choice:has(input:checked){border-color:var(--primary);background:var(--tint)}
+    .choice input{width:20px;height:20px;margin:0;accent-color:var(--primary)}
+    .photo-box{display:grid;place-items:center;width:150px;aspect-ratio:3/4;border:2px dashed var(--field);border-radius:12px;background:var(--panel);color:var(--muted);text-align:center;font-size:14px;cursor:pointer;overflow:hidden;position:relative}
+    .photo-box img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+    .photo-box input{position:absolute;inset:0;opacity:0;cursor:pointer}
+    .photo-actions{margin-top:6px;text-align:center}
+    .link-btn{border:0;background:none;color:var(--primary-d);font-weight:700;font-size:14px;padding:4px;text-decoration:underline}
+    .rows{display:grid;gap:12px}
+    .row-card{position:relative;padding:14px;border:1px solid var(--border);border-radius:12px;background:#FCFCFC}
+    .row-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;color:var(--accent);font-weight:700}
+    .row-grid{display:grid;grid-template-columns:repeat(var(--cols,3),minmax(0,1fr));gap:12px}
+    .row-grid .wide{grid-column:span 2}.row-grid .all{grid-column:1/-1}
+    .row-grid label{display:block;margin-bottom:5px;color:var(--muted);font-size:14px;font-weight:700}
+    .skill-list{display:grid;gap:10px}
+    .skill{display:grid;grid-template-columns:170px minmax(0,1fr) 200px;gap:12px;align-items:center;padding:12px 14px;border:1px solid var(--border);border-radius:12px;background:#FCFCFC}
+    .skill-name{font-weight:700;color:var(--accent)}
+    .skill .choice{min-height:40px;padding:6px 11px;font-size:14px}
+    .skill-head{display:grid;grid-template-columns:170px minmax(0,1fr) 200px;gap:12px;padding:0 14px;color:var(--muted);font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+    .btn{min-height:48px;padding:0 20px;border:0;border-radius:10px;font-weight:700;font-size:16px;transition:background .15s}
+    .btn:disabled{background:#B4B4B7;color:#fff;cursor:not-allowed}
+    .btn-primary{color:#fff;background:var(--primary)}.btn-primary:hover:not(:disabled){background:var(--primary-d)}
+    .btn-light{color:var(--accent);background:#fff;border:2px solid var(--accent)}.btn-light:hover{background:var(--panel)}
+    .btn-sm{min-height:38px;padding:0 12px;font-size:14px}
+    .btn-remove{min-height:34px;padding:0 10px;border:1.5px solid var(--border);border-radius:8px;color:#B91C1C;background:#fff;font-size:13px;font-weight:700}
+    .btn:focus-visible,.btn-remove:focus-visible,.link-btn:focus-visible{outline:none;box-shadow:0 0 0 3px #fff,0 0 0 6px var(--accent)}
+    .add-row{margin-top:10px}
+    .consent{display:flex;align-items:flex-start;gap:11px;padding:14px;border:1px solid var(--border);border-radius:13px;background:var(--panel)}
+    .consent input{flex:0 0 auto;width:22px;height:22px;margin:2px 0 0;accent-color:var(--primary)}.consent span{font-size:15px;line-height:1.55}
+    .sign-wrap{margin-top:16px}
+    .sign-pad{display:block;width:100%;max-width:520px;height:170px;border:1.5px solid var(--field);border-radius:10px;background:#fff;touch-action:none;cursor:crosshair}
+    .sign-tools{display:flex;gap:12px;align-items:center;margin-top:6px;color:var(--muted);font-size:14px}
+    .actions{display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap;margin-top:17px}
+    .submit-btn{min-width:240px;min-height:54px;font-size:17px}
+    .success-view{text-align:center;padding:32px 18px}
+    .success-icon{display:grid;place-items:center;width:84px;height:84px;margin:0 auto 17px;border-radius:50%;color:#fff;background:var(--success);font-size:42px;font-weight:900}
+    .success-view h2{margin:0;color:var(--accent)}.success-view p{color:var(--muted);line-height:1.6}
+    .response-code{display:inline-block;margin:6px 0 17px;padding:9px 14px;border-radius:10px;background:var(--panel);color:var(--accent);font-family:monospace;font-size:18px;font-weight:800}
+    .toast{position:fixed;z-index:2000;left:50%;bottom:calc(18px + env(safe-area-inset-bottom));display:none;width:min(520px,calc(100% - 26px));padding:14px 16px;border-radius:12px;color:#fff;background:var(--accent);box-shadow:0 18px 45px #0004;transform:translateX(-50%);font-weight:700;line-height:1.45}.toast.on{display:block}.toast.error{background:var(--danger)}
+    .loading{position:fixed;inset:0;z-index:3000;display:none;place-items:center;background:rgba(255,255,255,.75)}.loading.on{display:grid}
+    .spinner{width:50px;height:50px;border:5px solid var(--panel);border-top-color:var(--primary);border-radius:50%;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+    .hidden{display:none!important}
+    @media(max-width:760px){
+      .topbar-in{width:100%;padding:6px 14px}.topbar-logo{height:44px}
+      .app{width:calc(100% - 24px)}.intro h1{font-size:22px}.progress-wrap{top:62px}
+      .card{padding:17px 13px}
+      .grid,.grid3,.row-grid{grid-template-columns:1fr}.full,.row-grid .wide{grid-column:auto}
+      .personal-top{grid-template-columns:1fr}.photo-box{width:132px;margin:0 auto}
+      .skill,.skill-head{grid-template-columns:1fr}.skill-head{display:none}
+      .btn,.submit-btn{width:100%;min-height:52px}.actions{display:grid;grid-template-columns:1fr}
+      .notice:has(.btn){flex-wrap:wrap}.notice .btn{margin-left:0}
+      input[type="text"],input[type="date"],input[type="month"],input[type="email"],input[type="tel"],select,textarea{min-height:52px}
+    }
+  </style>
+</head>
+<body>
+  <div class="loading" id="loading"><div class="spinner"></div></div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <header class="topbar">
+    <div class="topbar-in">
+      <img class="topbar-logo" src="../images/logo.png" alt="TBS Logistics" width="89" height="52">
+      <a class="topbar-link" href="../">Biểu mẫu nhân sự</a>
+    </div>
+  </header>
+
+  <main class="app">
+    <div class="intro">
+      <p class="eyebrow">TBS Logistics · Tuyển dụng</p>
+      <h1>HỒ SƠ DỰ TUYỂN</h1>
+      <p class="intro-sub">Anh/Chị vui lòng điền đầy đủ và chính xác. Mục có dấu <span style="color:var(--danger)">*</span> là bắt buộc.</p>
+      <ul class="facts"><li class="fact">Mã tài liệu: TBSL-NS-QT01-BM02</li><li class="fact">Ban hành lần: 02</li><li class="fact">Ngày ban hành: 08/08/2022</li></ul>
+      <div class="notice"><span aria-hidden="true">🔒</span><span>Thông tin chỉ dùng cho việc tuyển dụng tại TBS Logistics. Bài đang điền được tự lưu trên máy này cho đến khi gửi.</span></div>
+      <div class="notice warn hidden" id="configWarning"><span aria-hidden="true">⚠</span><span>Biểu mẫu chưa được kết nối máy chủ nên chưa gửi được. Vui lòng báo phòng HCNS.</span></div>
+      <div class="notice hidden" id="draftNotice"><span aria-hidden="true">↺</span><span id="draftText">Đã khôi phục bài đang điền dở.</span><button class="btn btn-light btn-sm" type="button" id="clearDraftButton">Xóa và điền lại</button></div>
+    </div>
+
+    <div class="progress-wrap" id="progressWrap">
+      <div class="progress"><div class="progress-bar" id="progressBar"></div></div>
+      <div class="progress-text"><span>Mục bắt buộc đã điền</span><span id="progressPercent">0%</span></div>
+    </div>
+
+    <form id="hsForm" novalidate autocomplete="on">
+      <!-- I. THÔNG TIN CÁ NHÂN -->
+      <section class="card" id="sec1">
+        <div class="section-title"><div class="section-no">I</div><div><h2>Thông tin cá nhân</h2></div></div>
+        <div class="personal-top">
+          <div class="grid">
+            <div class="full" data-field="fullName"><label class="field-label required" for="fullName">Họ &amp; tên</label><input id="fullName" type="text" maxlength="120" autocomplete="name" data-required><div class="error-text">Vui lòng nhập họ tên.</div></div>
+            <div data-field="dob"><label class="field-label required" for="dob">Ngày/tháng/năm sinh</label><input id="dob" type="date" data-required><div class="error-text">Vui lòng chọn ngày sinh.</div></div>
+            <div data-field="birthPlace"><label class="field-label" for="birthPlace">Nơi sinh</label><input id="birthPlace" type="text" maxlength="120" placeholder="Tỉnh/thành phố"></div>
+            <div class="full" data-field="gender"><span class="field-label required">Giới tính</span>
+              <div class="choice-row" data-radio="gender" data-required><label class="choice"><input type="radio" name="gender" value="Nam">Nam</label><label class="choice"><input type="radio" name="gender" value="Nữ">Nữ</label></div>
+              <div class="error-text">Vui lòng chọn giới tính.</div></div>
+          </div>
+          <div>
+            <span class="field-label" style="text-align:center">Ảnh 3x4</span>
+            <label class="photo-box" id="photoBox"><span id="photoHint">Bấm để chọn<br>hoặc chụp ảnh</span><img id="photoPreview" class="hidden" alt="Ảnh 3x4"><input id="photoInput" type="file" accept="image/*" aria-label="Chọn ảnh 3x4"></label>
+            <div class="photo-actions"><button class="link-btn hidden" type="button" id="photoRemove">Xóa ảnh</button></div>
+          </div>
+        </div>
+
+        <div class="sub-title">Vị trí ứng tuyển</div>
+        <div class="grid">
+          <div data-field="position1"><label class="field-label required" for="position1">Ưu tiên 1</label><input id="position1" type="text" maxlength="120" data-required><div class="error-text">Vui lòng nhập vị trí ứng tuyển.</div></div>
+          <div data-field="position2"><label class="field-label" for="position2">Ưu tiên 2</label><input id="position2" type="text" maxlength="120"></div>
+        </div>
+
+        <div class="sub-title">Mức lương mong đợi<small>Ghi số tiền mỗi tháng, ví dụ 9.000.000 đ</small></div>
+        <div class="grid">
+          <div><label class="field-label" for="salary1Probation">1. Thử việc</label><input id="salary1Probation" type="text" maxlength="60" inputmode="numeric"></div>
+          <div><label class="field-label" for="salary1After">Sau thử việc</label><input id="salary1After" type="text" maxlength="60" inputmode="numeric"></div>
+          <div><label class="field-label" for="salary2Probation">2. Thử việc</label><input id="salary2Probation" type="text" maxlength="60" inputmode="numeric"></div>
+          <div><label class="field-label" for="salary2After">Sau thử việc</label><input id="salary2After" type="text" maxlength="60" inputmode="numeric"></div>
+          <div class="full" data-field="startDate"><label class="field-label" for="startDate">Ngày có thể bắt đầu nhận việc</label><input id="startDate" type="date"></div>
+        </div>
+
+        <div class="sub-title">Giấy tờ</div>
+        <div class="grid grid3">
+          <div><label class="field-label" for="nationality">Quốc tịch</label><input id="nationality" type="text" maxlength="60" value="Việt Nam"></div>
+          <div><label class="field-label" for="ethnicity">Dân tộc</label><input id="ethnicity" type="text" maxlength="60" placeholder="Kinh"></div>
+          <div><label class="field-label" for="religion">Tôn giáo</label><input id="religion" type="text" maxlength="60" placeholder="Không"></div>
+          <div data-field="idNumber"><label class="field-label required" for="idNumber">Số CMND/CCCD</label><input id="idNumber" type="text" maxlength="20" inputmode="numeric" data-required><div class="error-text">Vui lòng nhập số CMND/CCCD.</div></div>
+          <div><label class="field-label" for="idIssueDate">Ngày cấp</label><input id="idIssueDate" type="date"></div>
+          <div><label class="field-label" for="idIssuePlace">Nơi cấp</label><input id="idIssuePlace" type="text" maxlength="120"></div>
+        </div>
+
+        <div class="sub-title">Liên hệ</div>
+        <div class="grid">
+          <div class="full" data-field="permanentAddress"><label class="field-label required" for="permanentAddress">Địa chỉ thường trú</label><input id="permanentAddress" type="text" maxlength="250" autocomplete="street-address" data-required><div class="error-text">Vui lòng nhập địa chỉ thường trú.</div></div>
+          <div class="full"><label class="field-label" for="tempAddress">Địa chỉ tạm trú</label><input id="tempAddress" type="text" maxlength="250" placeholder="Bỏ trống nếu giống địa chỉ thường trú"></div>
+          <div data-field="mobile"><label class="field-label required" for="mobile">Di động</label><input id="mobile" type="tel" maxlength="20" autocomplete="tel" data-required data-phone><div class="error-text">Vui lòng nhập số điện thoại (9–11 số).</div></div>
+          <div data-field="email"><label class="field-label" for="email">Email</label><input id="email" type="email" maxlength="120" autocomplete="email" data-email><div class="error-text">Email chưa đúng.</div></div>
+          <div class="full"><span class="field-label">Tình trạng gia đình</span>
+            <div class="choice-row"><label class="choice"><input type="radio" name="marital" value="Độc thân">Độc thân</label><label class="choice"><input type="radio" name="marital" value="Có gia đình">Có gia đình</label><label class="choice"><input type="radio" name="marital" value="Ly dị">Ly dị</label><label class="choice"><input type="radio" name="marital" value="Góa">Góa</label></div></div>
+        </div>
+      </section>
+
+      <!-- II. THÔNG TIN GIA ĐÌNH -->
+      <section class="card" id="sec2">
+        <div class="section-title"><div class="section-no">II</div><div><h2>Thông tin gia đình</h2><p>Bố, mẹ, vợ/chồng, con, anh chị em ruột.</p></div></div>
+        <div class="rows" id="rows-family"></div>
+        <button class="btn btn-light btn-sm add-row" type="button" data-add="family">＋ Thêm người thân</button>
+      </section>
+
+      <!-- III. TRÌNH ĐỘ HỌC VẤN -->
+      <section class="card" id="sec3">
+        <div class="section-title"><div class="section-no">III</div><div><h2>Trình độ học vấn</h2></div></div>
+        <div class="sub-title">1. Các văn bằng đã đạt được<small>Liệt kê các bằng cấp chuyên môn Anh/Chị đã đạt được.</small></div>
+        <div class="rows" id="rows-degrees"></div>
+        <button class="btn btn-light btn-sm add-row" type="button" data-add="degrees">＋ Thêm văn bằng</button>
+
+        <div class="sub-title">2. Các khóa huấn luyện<small>Liệt kê các khóa học tập / huấn luyện chuyên môn Anh/Chị đã dự.</small></div>
+        <div class="rows" id="rows-courses"></div>
+        <button class="btn btn-light btn-sm add-row" type="button" data-add="courses">＋ Thêm khóa học</button>
+
+        <div class="sub-title">3. Kỹ năng ngoại ngữ</div>
+        <div class="skill-head"><span>Ngôn ngữ</span><span>Mức độ</span><span>Văn bằng</span></div>
+        <div class="skill-list" id="rows-languages"></div>
+        <button class="btn btn-light btn-sm add-row" type="button" data-add="languages">＋ Thêm ngôn ngữ khác</button>
+
+        <div class="sub-title">4. Kỹ năng vi tính</div>
+        <div class="skill-head"><span>Chương trình</span><span>Mức độ</span><span>Văn bằng</span></div>
+        <div class="skill-list" id="rows-computer"></div>
+      </section>
+
+      <!-- IV. KINH NGHIỆM LÀM VIỆC -->
+      <section class="card" id="sec4">
+        <div class="section-title"><div class="section-no">IV</div><div><h2>Kinh nghiệm làm việc</h2><p>Liệt kê từ thời gian gần đây về trước. Chưa đi làm thì bỏ trống.</p></div></div>
+        <div class="rows" id="rows-work"></div>
+        <button class="btn btn-light btn-sm add-row" type="button" data-add="work">＋ Thêm công ty</button>
+      </section>
+
+      <!-- V. THÔNG TIN YÊU CẦU KHÁC -->
+      <section class="card" id="sec5">
+        <div class="section-title"><div class="section-no">V</div><div><h2>Thông tin yêu cầu khác</h2></div></div>
+        <div class="grid">
+          <div class="full"><span class="field-label">Bạn đã từng làm việc ở TBS chưa?</span>
+            <div class="choice-row"><label class="choice"><input type="radio" name="everTBS" value="Có">Có</label><label class="choice"><input type="radio" name="everTBS" value="Không">Không</label></div></div>
+          <div class="full hidden" data-show-when="everTBS=Có"><label class="field-label" for="everTBSDetail">Bộ phận làm việc và thời gian cụ thể</label><input id="everTBSDetail" type="text" maxlength="250"></div>
+
+          <div class="full"><span class="field-label">Bạn có người thân, bạn bè làm việc cho TBS không?</span>
+            <div class="choice-row"><label class="choice"><input type="radio" name="relativeTBS" value="Có">Có</label><label class="choice"><input type="radio" name="relativeTBS" value="Không">Không</label></div></div>
+          <div class="full hidden" data-show-when="relativeTBS=Có"><label class="field-label" for="relativeTBSDetail">Tên / Chức vụ</label><input id="relativeTBSDetail" type="text" maxlength="250"></div>
+
+          <div class="full"><span class="field-label">Bạn có người thân, bạn bè làm việc cho công ty đối thủ của TBS không?</span>
+            <div class="choice-row"><label class="choice"><input type="radio" name="relativeCompetitor" value="Có">Có</label><label class="choice"><input type="radio" name="relativeCompetitor" value="Không">Không</label></div></div>
+          <div class="full hidden" data-show-when="relativeCompetitor=Có"><label class="field-label" for="relativeCompetitorDetail">Tên / Chức vụ</label><input id="relativeCompetitorDetail" type="text" maxlength="250"></div>
+
+          <div class="full"><label class="field-label" for="whyTBS">Tại sao bạn nộp đơn vào TBS?</label><textarea id="whyTBS" maxlength="1000"></textarea></div>
+          <div class="full"><label class="field-label" for="hobbies">Những hoạt động ưa thích?</label><textarea id="hobbies" maxlength="1000"></textarea></div>
+          <div><label class="field-label" for="sport">Môn thể thao bạn ưa thích nhất?</label><input id="sport" type="text" maxlength="120"></div>
+          <div><span class="field-label">Mức độ tập luyện</span>
+            <div class="choice-row"><label class="choice"><input type="radio" name="sportFreq" value="Thường xuyên">Thường xuyên</label><label class="choice"><input type="radio" name="sportFreq" value="Thỉnh thoảng">Thỉnh thoảng</label><label class="choice"><input type="radio" name="sportFreq" value="Khi thuận tiện">Khi thuận tiện</label></div></div>
+        </div>
+
+        <div class="sub-title">Số điện thoại người thân / bạn bè<small>Vui lòng liệt kê 03 số. Ít nhất 1 số là bắt buộc.</small></div>
+        <div class="rows" id="rows-phones"></div>
+
+        <div class="sub-title">Bạn biết thông tin tuyển dụng của công ty chúng tôi qua</div>
+        <div class="choice-row">
+          <label class="choice"><input type="checkbox" name="sources" value="Quảng cáo">Quảng cáo</label>
+          <label class="choice"><input type="checkbox" name="sources" value="Mạng XH">Mạng XH</label>
+          <label class="choice"><input type="checkbox" name="sources" value="TT giới thiệu việc làm">TT giới thiệu việc làm</label>
+          <label class="choice"><input type="checkbox" name="sources" value="Người thân, bạn bè">Người thân, bạn bè</label>
+          <label class="choice"><input type="checkbox" name="sources" value="Khác">Khác</label>
+        </div>
+        <div class="hidden" data-show-when="sources=Khác" style="margin-top:10px"><label class="field-label" for="sourceOther">Khác (ghi rõ)</label><input id="sourceOther" type="text" maxlength="120"></div>
+      </section>
+
+      <!-- VI. THAM CHIẾU -->
+      <section class="card" id="sec6">
+        <div class="section-title"><div class="section-no">VI</div><div><h2>Tham chiếu</h2><p>Người có thể xác nhận quá trình làm việc của Anh/Chị.</p></div></div>
+        <div class="rows" id="rows-references"></div>
+        <button class="btn btn-light btn-sm add-row" type="button" data-add="references">＋ Thêm người tham chiếu</button>
+
+        <div class="grid" style="margin-top:18px">
+          <div><label class="field-label" for="bhxh">Số sổ BHXH</label><input id="bhxh" type="text" maxlength="20" inputmode="numeric"></div>
+          <div><label class="field-label" for="taxCode">Mã số thuế</label><input id="taxCode" type="text" maxlength="20" inputmode="numeric"></div>
+        </div>
+      </section>
+
+      <!-- Cam kết + chữ ký -->
+      <section class="card" id="secSign">
+        <div data-field="consent">
+          <label class="consent"><input id="consent" type="checkbox" data-required><span><b>Tôi đồng ý cho Phòng HCNS ICD TBS xác minh tất cả các chi tiết cá nhân được kê khai trên đây.</b> Tôi xác nhận đã cung cấp các thông tin chính xác và đúng sự thật trong bản khai này, và tôi sẽ chịu trách nhiệm thông báo ngay lập tức nếu có bất cứ sự thay đổi nào. Tôi hoàn toàn chịu trách nhiệm theo Nội quy lao động của công ty nếu có bất cứ chi tiết nào sai sự thật.</span></label>
+          <div class="error-text">Vui lòng đánh dấu xác nhận trước khi gửi.</div>
+        </div>
+        <div class="sign-wrap">
+          <span class="field-label">Chữ ký ứng viên</span>
+          <canvas class="sign-pad" id="signPad" aria-label="Ô ký tên"></canvas>
+          <div class="sign-tools"><span>Ký bằng ngón tay hoặc chuột (không bắt buộc, có thể ký tay trên bản in).</span><button class="link-btn" type="button" id="signClear">Ký lại</button></div>
+        </div>
+        <div class="actions"><button class="btn btn-primary submit-btn" id="submitButton" type="submit">Gửi hồ sơ</button></div>
+      </section>
+    </form>
+
+    <section class="card success-view hidden" id="successView">
+      <div class="success-icon">✓</div>
+      <h2>Đã nhận hồ sơ</h2>
+      <p>Cảm ơn Anh/Chị đã ứng tuyển. Phòng HCNS sẽ liên hệ qua số điện thoại đã đăng ký.<br>Mã hồ sơ:</p>
+      <div class="response-code" id="responseCode"></div>
+      <div class="actions" style="justify-content:center">
+        <a class="btn btn-primary" id="viewButton" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;justify-content:center;text-decoration:none">Xem / in hồ sơ</a>
+        <button class="btn btn-light" type="button" id="newButton">Điền hồ sơ khác</button>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // Dán URL /exec của Apps Script "Hồ sơ dự tuyển" (apps-script/HoSoDuTuyen.gs) vào đây sau khi triển khai.
+    const WEB_APP_URL = "";
+    const DRAFT_KEY = "tbs_hsdt_draft_v1";
+    const LEVELS = ["Tốt", "Khá", "Căn bản", "Không biết"];
+    const COMPUTER_PROGRAMS = ["Email-Internet", "Ms Word", "Ms Excel", "Ms PowerPoint", "CorelDraw", "AutoCad"];
+
+    // Các bảng nhiều dòng, theo đúng cột của mẫu Word TBSL-NS-QT01-BM02.
+    const REPEATERS = {
+      family: { title: "Người thân", start: 3, max: 10, cols: 3, fields: [
+        { k: "name", label: "Họ & tên", max: 120 }, { k: "relation", label: "Quan hệ", max: 40, placeholder: "Bố, mẹ, vợ…" },
+        { k: "birthYear", label: "Năm sinh", max: 4, numeric: true }, { k: "job", label: "Nghề nghiệp", max: 120 },
+        { k: "address", label: "Địa chỉ thường trú", max: 250, cls: "wide" }] },
+      degrees: { title: "Văn bằng", start: 1, max: 8, cols: 3, fields: [
+        { k: "school", label: "Tên trường", max: 160, cls: "wide" }, { k: "major", label: "Chuyên ngành", max: 120 },
+        { k: "gradYear", label: "Năm tốt nghiệp", max: 4, numeric: true }, { k: "degree", label: "Bằng cấp", max: 80, placeholder: "Cử nhân, Kỹ sư…" },
+        { k: "rank", label: "Xếp loại", max: 40 }] },
+      courses: { title: "Khóa học", start: 1, max: 10, cols: 2, fields: [
+        { k: "org", label: "Đơn vị tổ chức", max: 160 }, { k: "course", label: "Tên khóa học", max: 160 },
+        { k: "time", label: "Thời gian học", max: 60, placeholder: "03/2024 – 05/2024" }, { k: "certificate", label: "Chứng chỉ", max: 120 }] },
+      work: { title: "Công ty", start: 1, max: 6, cols: 2, fields: [
+        { k: "company", label: "Tên công ty", max: 160, cls: "all" }, { k: "address", label: "Địa chỉ", max: 250, cls: "all" },
+        { k: "industry", label: "Ngành nghề kinh doanh", max: 120 }, { k: "staffCount", label: "Số lượng nhân viên", max: 20, numeric: true },
+        { k: "from", label: "Thời gian công tác: từ", type: "month" }, { k: "to", label: "đến", type: "month" },
+        { k: "title", label: "Chức vụ", max: 120 }, { k: "lastSalary", label: "Mức lương cuối cùng", max: 60, numeric: true },
+        { k: "manager", label: "Họ & tên cấp trên trực tiếp", max: 120 }, { k: "managerTitle", label: "Chức vụ cấp trên", max: 120 },
+        { k: "reason", label: "Lý do nghỉ việc", max: 500, cls: "all", textarea: true }] },
+      references: { title: "Người tham chiếu", start: 1, max: 5, cols: 2, fields: [
+        { k: "companyName", label: "Tên công ty", max: 160 }, { k: "companyAddress", label: "Địa chỉ công ty", max: 250 },
+        { k: "contact", label: "Người liên hệ", max: 120 }, { k: "title", label: "Chức vụ", max: 120 },
+        { k: "phone", label: "Điện thoại", max: 20, type: "tel" }] },
+      phones: { title: "Số điện thoại", start: 3, max: 3, fixed: true, cols: 2, fields: [
+        { k: "phone", label: "Số điện thoại", max: 20, type: "tel" }, { k: "relation", label: "Quan hệ", max: 60 }] }
+    };
+
+    const $ = id => document.getElementById(id);
+    const SIMPLE_FIELDS = ["fullName", "dob", "birthPlace", "position1", "position2", "salary1Probation", "salary1After", "salary2Probation", "salary2After",
+      "startDate", "nationality", "ethnicity", "religion", "idNumber", "idIssueDate", "idIssuePlace", "permanentAddress", "tempAddress", "mobile", "email",
+      "everTBSDetail", "relativeTBSDetail", "relativeCompetitorDetail", "whyTBS", "hobbies", "sport", "sourceOther", "bhxh", "taxCode"];
+    const RADIO_FIELDS = ["gender", "marital", "everTBS", "relativeTBS", "relativeCompetitor", "sportFreq"];
+
+    let rowSeq = 0;
+    let photoDataUrl = "";
+    let submissionId = newId();
+    let submitting = false;
+
+    function newId() {
+      if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+      return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, c => { const r = Math.random() * 16 | 0; return (c === "x" ? r : (r & 3 | 8)).toString(16); });
+    }
+    function esc(value) { return String(value == null ? "" : value).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
+    function toast(message, isError) {
+      const el = $("toast"); el.textContent = message; el.className = "toast on" + (isError ? " error" : "");
+      clearTimeout(toast.timer); toast.timer = setTimeout(() => { el.className = "toast"; }, 4500);
+    }
+    function setLoading(on) { $("loading").classList.toggle("on", on); }
+
+    /* ---------- Bảng nhiều dòng ---------- */
+    function addRow(kind, values) {
+      const def = REPEATERS[kind];
+      const box = $("rows-" + kind);
+      if (box.children.length >= def.max) { toast("Tối đa " + def.max + " dòng."); return; }
+      const id = "r" + (++rowSeq);
+      const card = document.createElement("div");
+      card.className = "row-card"; card.dataset.kind = kind;
+      card.innerHTML = '<div class="row-head"><span class="row-title"></span>' + (def.fixed ? "" : '<button class="btn-remove" type="button">Xóa</button>') + '</div>' +
+        '<div class="row-grid" style="--cols:' + def.cols + '">' + def.fields.map(f => {
+          const fid = id + "_" + f.k;
+          const attrs = 'id="' + fid + '" data-k="' + f.k + '"' + (f.max ? ' maxlength="' + f.max + '"' : "") + (f.placeholder ? ' placeholder="' + esc(f.placeholder) + '"' : "") + (f.numeric ? ' inputmode="numeric"' : "");
+          const control = f.textarea ? "<textarea " + attrs + "></textarea>" : '<input type="' + (f.type || "text") + '" ' + attrs + ">";
+          return '<div class="' + (f.cls || "") + '"><label for="' + fid + '">' + esc(f.label) + "</label>" + control + "</div>";
+        }).join("") + "</div>";
+      box.appendChild(card);
+      if (values) def.fields.forEach(f => { const el = card.querySelector('[data-k="' + f.k + '"]'); if (el && values[f.k] != null) el.value = values[f.k]; });
+      const remove = card.querySelector(".btn-remove");
+      if (remove) remove.onclick = () => { card.remove(); renumber(kind); saveDraftSoon(); updateProgress(); };
+      renumber(kind);
+    }
+    function renumber(kind) {
+      const def = REPEATERS[kind];
+      const cards = [...$("rows-" + kind).children];
+      cards.forEach((card, i) => { card.querySelector(".row-title").textContent = def.title + " " + (i + 1); });
+      const addButton = document.querySelector('[data-add="' + kind + '"]');
+      if (addButton) addButton.disabled = cards.length >= def.max;
+    }
+    function readRows(kind) {
+      const def = REPEATERS[kind];
+      return [...$("rows-" + kind).children].map(card => {
+        const row = {};
+        def.fields.forEach(f => { row[f.k] = card.querySelector('[data-k="' + f.k + '"]').value.trim(); });
+        return row;
+      }).filter(row => Object.values(row).some(Boolean));
+    }
+
+    /* ---------- Ngoại ngữ, vi tính ---------- */
+    function skillRow(kind, values, fixedName) {
+      const box = $("rows-" + kind);
+      if (kind === "languages" && box.children.length >= 5) { toast("Tối đa 5 ngôn ngữ."); return; }
+      const id = "s" + (++rowSeq);
+      const row = document.createElement("div");
+      row.className = "skill"; row.dataset.kind = kind;
+      const nameHtml = fixedName ? '<div class="skill-name" data-name="' + esc(fixedName) + '">' + esc(fixedName) + "</div>"
+        : '<div><input type="text" data-k="name" maxlength="60" placeholder="' + (kind === "languages" ? "Ngôn ngữ khác" : "Khác") + '" aria-label="Tên"></div>';
+      row.innerHTML = nameHtml +
+        '<div class="choice-row">' + LEVELS.map(level => '<label class="choice"><input type="radio" name="' + id + '" value="' + level + '">' + level + "</label>").join("") + "</div>" +
+        '<div style="display:flex;gap:8px;align-items:center"><input type="text" data-k="cert" maxlength="80" placeholder="Văn bằng (nếu có)" aria-label="Văn bằng">' +
+        (fixedName || kind !== "languages" ? "" : '<button class="btn-remove" type="button" aria-label="Xóa">Xóa</button>') + "</div>";
+      box.appendChild(row);
+      if (values) {
+        const name = row.querySelector('[data-k="name"]'); if (name && values.name) name.value = values.name;
+        row.querySelector('[data-k="cert"]').value = values.cert || "";
+        const radio = [...row.querySelectorAll('input[type="radio"]')].find(r => r.value === values.level); if (radio) radio.checked = true;
+      }
+      const remove = row.querySelector(".btn-remove");
+      if (remove) remove.onclick = () => { row.remove(); saveDraftSoon(); };
+    }
+    function readSkills(kind) {
+      return [...$("rows-" + kind).children].map(row => {
+        const fixed = row.querySelector("[data-name]");
+        const checked = row.querySelector('input[type="radio"]:checked');
+        return {
+          name: fixed ? fixed.dataset.name : row.querySelector('[data-k="name"]').value.trim(),
+          level: checked ? checked.value : "",
+          cert: row.querySelector('[data-k="cert"]').value.trim()
+        };
+      });
+    }
+
+    /* ---------- Ảnh 3x4: cắt đúng tỉ lệ 3:4, thu nhỏ còn 450x600 ---------- */
+    function loadPhoto(file) {
+      if (!file) return;
+      if (!/^image\//.test(file.type)) { toast("Vui lòng chọn file ảnh.", true); return; }
+      const url = URL.createObjectURL(file);
+      const img = new Image();
+      img.onload = () => {
+        const targetW = 450, targetH = 600;
+        const ratio = 3 / 4;
+        let sw = img.naturalWidth, sh = img.naturalHeight, sx = 0, sy = 0;
+        if (sw / sh > ratio) { const w = sh * ratio; sx = (sw - w) / 2; sw = w; } else { const h = sw / ratio; sy = (sh - h) / 4; sh = h; }
+        const canvas = document.createElement("canvas"); canvas.width = targetW; canvas.height = targetH;
+        const ctx = canvas.getContext("2d"); ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, targetW, targetH);
+        ctx.drawImage(img, sx, sy, sw, sh, 0, 0, targetW, targetH);
+        URL.revokeObjectURL(url);
+        setPhoto(canvas.toDataURL("image/jpeg", 0.85));
+        saveDraftSoon();
+      };
+      img.onerror = () => { URL.revokeObjectURL(url); toast("Không đọc được ảnh này. Vui lòng chọn ảnh khác.", true); };
+      img.src = url;
+    }
+    function setPhoto(dataUrl) {
+      photoDataUrl = dataUrl || "";
+      $("photoPreview").src = photoDataUrl;
+      $("photoPreview").classList.toggle("hidden", !photoDataUrl);
+      $("photoHint").classList.toggle("hidden", !!photoDataUrl);
+      $("photoRemove").classList.toggle("hidden", !photoDataUrl);
+    }
+
+    /* ---------- Chữ ký ---------- */
+    const signPad = { canvas: null, ctx: null, drawing: false, dirty: false, last: null };
+    function setupSignPad() {
+      const canvas = $("signPad");
+      signPad.canvas = canvas;
+      const resize = () => {
+        const saved = signPad.dirty ? canvas.toDataURL("image/png") : "";
+        const ratio = Math.max(window.devicePixelRatio || 1, 1);
+        canvas.width = canvas.clientWidth * ratio; canvas.height = canvas.clientHeight * ratio;
+        signPad.ctx = canvas.getContext("2d"); signPad.ctx.scale(ratio, ratio);
+        signPad.ctx.lineWidth = 2.4; signPad.ctx.lineCap = "round"; signPad.ctx.lineJoin = "round"; signPad.ctx.strokeStyle = "#1a2a6c";
+        if (saved) drawSignature(saved);
+      };
+      resize();
+      window.addEventListener("resize", () => { clearTimeout(resize.t); resize.t = setTimeout(resize, 150); });
+      const point = e => { const r = canvas.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; };
+      canvas.addEventListener("pointerdown", e => { e.preventDefault(); canvas.setPointerCapture(e.pointerId); signPad.drawing = true; signPad.last = point(e); });
+      canvas.addEventListener("pointermove", e => {
+        if (!signPad.drawing) return;
+        const p = point(e);
+        signPad.ctx.beginPath(); signPad.ctx.moveTo(signPad.last.x, signPad.last.y); signPad.ctx.lineTo(p.x, p.y); signPad.ctx.stroke();
+        signPad.last = p; signPad.dirty = true;
+      });
+      const end = () => { if (signPad.drawing) { signPad.drawing = false; saveDraftSoon(); } };
+      canvas.addEventListener("pointerup", end); canvas.addEventListener("pointercancel", end); canvas.addEventListener("pointerleave", end);
+      $("signClear").onclick = clearSignature;
+    }
+    function clearSignature() {
+      const c = signPad.canvas; signPad.ctx.save(); signPad.ctx.setTransform(1, 0, 0, 1, 0, 0); signPad.ctx.clearRect(0, 0, c.width, c.height); signPad.ctx.restore();
+      signPad.dirty = false; saveDraftSoon();
+    }
+    function drawSignature(dataUrl) {
+      const img = new Image();
+      img.onload = () => { signPad.ctx.drawImage(img, 0, 0, signPad.canvas.clientWidth, signPad.canvas.clientHeight); signPad.dirty = true; };
+      img.src = dataUrl;
+    }
+    function signatureDataUrl() {
+      if (!signPad.dirty) return "";
+      // Xuất nền trắng, cỡ cố định để file nhỏ.
+      const out = document.createElement("canvas"); out.width = 520; out.height = 170;
+      const ctx = out.getContext("2d"); ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, out.width, out.height);
+      ctx.drawImage(signPad.canvas, 0, 0, out.width, out.height);
+      return out.toDataURL("image/png");
+    }
+
+    /* ---------- Thu thập dữ liệu ---------- */
+    function radioValue(name) { const el = document.querySelector('input[name="' + name + '"]:checked'); return el ? el.value : ""; }
+    function collect() {
+      const data = { submissionId: submissionId, form: "TBSL-NS-QT01-BM02", clientTimestamp: new Date().toISOString() };
+      SIMPLE_FIELDS.forEach(k => { data[k] = $(k).value.trim(); });
+      RADIO_FIELDS.forEach(k => { data[k] = radioValue(k); });
+      data.sources = [...document.querySelectorAll('input[name="sources"]:checked')].map(el => el.value);
+      data.consent = $("consent").checked;
+      Object.keys(REPEATERS).forEach(kind => { data[kind] = readRows(kind); });
+      data.phones = [...$("rows-phones").children].map(card => ({
+        phone: card.querySelector('[data-k="phone"]').value.trim(), relation: card.querySelector('[data-k="relation"]').value.trim() }));
+      data.languages = readSkills("languages").filter((row, i) => i === 0 || row.name || row.level || row.cert);
+      data.computer = readSkills("computer");
+      return data;
+    }
+
+    /* ---------- Kiểm tra ---------- */
+    function digits(value) { return String(value || "").replace(/\D/g, ""); }
+    function validate(data) {
+      document.querySelectorAll(".invalid").forEach(el => el.classList.remove("invalid"));
+      const bad = [];
+      const mark = key => { const box = document.querySelector('[data-field="' + key + '"]'); if (box) { box.classList.add("invalid"); bad.push(box); } };
+      if (!data.fullName) mark("fullName");
+      if (!data.dob) mark("dob");
+      if (!data.gender) mark("gender");
+      if (!data.position1) mark("position1");
+      if (!data.idNumber) mark("idNumber");
+      if (!data.permanentAddress) mark("permanentAddress");
+      const mobile = digits(data.mobile);
+      if (mobile.length < 9 || mobile.length > 11) mark("mobile");
+      if (data.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) mark("email");
+      if (!data.phones.some(p => digits(p.phone).length >= 9)) {
+        const first = $("rows-phones").querySelector('[data-k="phone"]'); first.classList.add("invalid"); bad.push(first.closest(".row-card"));
+      }
+      if (!data.consent) mark("consent");
+      return bad;
+    }
+    function updateProgress() {
+      const data = collect();
+      const checks = [data.fullName, data.dob, data.gender, data.position1, data.idNumber, data.permanentAddress,
+        digits(data.mobile).length >= 9, data.phones.some(p => digits(p.phone).length >= 9), data.consent];
+      const pct = Math.round(checks.filter(Boolean).length / checks.length * 100);
+      $("progressBar").style.width = pct + "%"; $("progressPercent").textContent = pct + "%";
+    }
+    function updateConditionals() {
+      document.querySelectorAll("[data-show-when]").forEach(box => {
+        const [name, value] = box.dataset.showWhen.split("=");
+        const on = [...document.querySelectorAll('input[name="' + name + '"]:checked')].some(el => el.value === value);
+        box.classList.toggle("hidden", !on);
+      });
+    }
+
+    /* ---------- Bản nháp trên máy ---------- */
+    function saveDraftSoon() { clearTimeout(saveDraftSoon.t); saveDraftSoon.t = setTimeout(saveDraft, 600); }
+    function saveDraft() {
+      try {
+        const data = collect(); data.photo = photoDataUrl; data.signature = signatureDataUrl(); data.savedAt = new Date().toISOString();
+        localStorage.setItem(DRAFT_KEY, JSON.stringify(data));
+      } catch (error) {}
+    }
+    function clearDraft() { try { localStorage.removeItem(DRAFT_KEY); } catch (error) {} }
+    function readDraft() { try { const raw = localStorage.getItem(DRAFT_KEY); return raw ? JSON.parse(raw) : null; } catch (error) { return null; } }
+
+    function fillForm(data) {
+      data = data || {};
+      SIMPLE_FIELDS.forEach(k => { $(k).value = data[k] != null ? data[k] : ""; });
+      RADIO_FIELDS.forEach(k => { document.querySelectorAll('input[name="' + k + '"]').forEach(el => { el.checked = el.value === data[k]; }); });
+      document.querySelectorAll('input[name="sources"]').forEach(el => { el.checked = (data.sources || []).includes(el.value); });
+      $("consent").checked = !!data.consent;
+      ["family", "degrees", "courses", "work", "references"].forEach(kind => {
+        $("rows-" + kind).innerHTML = "";
+        const rows = data[kind] && data[kind].length ? data[kind] : [];
+        const count = Math.max(rows.length, REPEATERS[kind].start);
+        for (let i = 0; i < count; i++) addRow(kind, rows[i]);
+      });
+      $("rows-phones").innerHTML = "";
+      for (let i = 0; i < 3; i++) addRow("phones", (data.phones || [])[i]);
+      $("rows-languages").innerHTML = "";
+      const languages = data.languages && data.languages.length ? data.languages : [{ name: "Tiếng Anh" }];
+      languages.forEach((row, i) => skillRow("languages", row, i === 0 ? "Tiếng Anh" : ""));
+      $("rows-computer").innerHTML = "";
+      const computer = data.computer || [];
+      COMPUTER_PROGRAMS.forEach((name, i) => skillRow("computer", computer[i], name));
+      skillRow("computer", computer[COMPUTER_PROGRAMS.length], "");
+      setPhoto(data.photo || "");
+      if (data.signature) drawSignature(data.signature); else if (signPad.ctx) clearSignature();
+      if (data.submissionId) submissionId = data.submissionId;
+      updateConditionals(); updateProgress();
+    }
+
+    /* ---------- Gửi ---------- */
+    function sleep(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
+    async function postSubmit(payload) {
+      const body = new URLSearchParams();
+      body.append("action", "submit");
+      body.append("data", JSON.stringify(payload));
+      const response = await fetch(WEB_APP_URL, { method: "POST", body: body });
+      const text = await response.text();
+      let result;
+      try { result = JSON.parse(text); } catch (error) { const e = new Error("Máy chủ trả về dữ liệu không đúng."); e.transient = true; throw e; }
+      if (!result.ok) { const e = new Error(result.message || "Không gửi được hồ sơ."); e.transient = !!result.retry; throw e; }
+      return result;
+    }
+    async function submitWithRetry(payload) {
+      let lastError;
+      for (let attempt = 1; attempt <= 3; attempt++) {
+        try { return await postSubmit(payload); }
+        catch (error) {
+          lastError = error;
+          // Lỗi mạng (fetch ném TypeError) hoặc máy chủ báo bận thì thử lại; cùng submissionId nên không tạo hồ sơ trùng.
+          const transient = error.transient || error instanceof TypeError;
+          if (!transient || attempt === 3) break;
+          await sleep(attempt * 1500 + Math.random() * 1000);
+        }
+      }
+      throw lastError;
+    }
+    async function onSubmit(event) {
+      event.preventDefault();
+      if (submitting) return;
+      const data = collect();
+      const bad = validate(data);
+      if (bad.length) {
+        bad[0].scrollIntoView({ behavior: "smooth", block: "center" });
+        const input = bad[0].querySelector("input,textarea"); if (input && input.type !== "radio") setTimeout(() => input.focus({ preventScroll: true }), 350);
+        toast("Còn " + bad.length + " mục cần điền / sửa (viền đỏ).", true);
+        return;
+      }
+      if (!WEB_APP_URL) { toast("Biểu mẫu chưa được kết nối máy chủ. Vui lòng báo phòng HCNS.", true); return; }
+      data.photo = photoDataUrl; data.signature = signatureDataUrl();
+      submitting = true; $("submitButton").disabled = true; setLoading(true);
+      try {
+        const result = await submitWithRetry(data);
+        clearDraft();
+        $("responseCode").textContent = result.code || result.id;
+        $("viewButton").href = result.viewUrl || (WEB_APP_URL + "?action=view&id=" + encodeURIComponent(result.id));
+        $("hsForm").classList.add("hidden"); $("progressWrap").classList.add("hidden"); $("draftNotice").classList.add("hidden");
+        $("successView").classList.remove("hidden");
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      } catch (error) {
+        toast((error instanceof TypeError ? "Mất kết nối mạng. " : "") + (error.message || "Không gửi được hồ sơ.") + " Bài đã điền vẫn được giữ, vui lòng bấm Gửi lại.", true);
+      } finally {
+        submitting = false; $("submitButton").disabled = false; setLoading(false);
+      }
+    }
+    function startNew() {
+      clearDraft(); submissionId = newId(); fillForm({ nationality: "Việt Nam" });
+      $("successView").classList.add("hidden"); $("hsForm").classList.remove("hidden"); $("progressWrap").classList.remove("hidden");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    /* ---------- Khởi động ---------- */
+    document.addEventListener("DOMContentLoaded", () => {
+      setupSignPad();
+      const draft = readDraft();
+      fillForm(draft || { nationality: "Việt Nam" });
+      if (draft && draft.savedAt) {
+        const when = new Date(draft.savedAt);
+        $("draftText").textContent = "Đã khôi phục bài đang điền dở (lưu lúc " + when.toLocaleString("vi-VN") + ").";
+        $("draftNotice").classList.remove("hidden");
+      }
+      if (!WEB_APP_URL) $("configWarning").classList.remove("hidden");
+      document.querySelectorAll("[data-add]").forEach(button => {
+        button.onclick = () => { const kind = button.dataset.add; if (kind === "languages") skillRow("languages", null, ""); else addRow(kind); saveDraftSoon(); };
+      });
+      const form = $("hsForm");
+      form.addEventListener("input", event => {
+        const box = event.target.closest(".invalid"); if (box) box.classList.remove("invalid");
+        event.target.classList.remove("invalid");
+        saveDraftSoon(); updateProgress();
+      });
+      form.addEventListener("change", () => { updateConditionals(); updateProgress(); saveDraftSoon(); });
+      form.addEventListener("submit", onSubmit);
+      $("photoInput").addEventListener("change", e => { loadPhoto(e.target.files[0]); e.target.value = ""; });
+      $("photoRemove").onclick = () => { setPhoto(""); saveDraftSoon(); };
+      $("clearDraftButton").onclick = () => { if (confirm("Xóa toàn bộ nội dung đang điền?")) { startNew(); $("draftNotice").classList.add("hidden"); } };
+      $("newButton").onclick = startNew;
+    });
+  </script>
+</body>
+</html>
